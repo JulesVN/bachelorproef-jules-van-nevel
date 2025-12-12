@@ -1,0 +1,134 @@
+%---------- Inleiding ---------------------------------------------------------
+
+\section{Inleiding}%
+\label{sec:inleiding}
+
+Game modding vormt vandaag een belangrijk onderdeel van de hedendaagse gamecultuur. Het geeft spelers de mogelijkheid om bestaande spellen aan te passen of uit te breiden met nieuwe content, functionaliteiten en zelfs bug fixes. Dankzij modding blijven games vaak jarenlang relevant en ontstaan er gemeenschappen (communities) waarin spelers niet enkel consumenten zijn, maar ook ontwikkelaars en ontwerpers. Om dit proces te ondersteunen maken veel spelers gebruik van zogenaamde modlaunchers, dit zijn programma’s die de installatie, configuratie en het updaten van mods automatiseren. Een van de bekendere voorbeelden hiervan is het Comprehensive Kerbal Archive Network (CKAN), de modlauncher voor het ruimtevaartspel Kerbal Space Program.
+
+
+CKAN laat gebruikers toe om met enkele muisklikken duizenden mods te installeren, afhankelijkheden automatisch op te lossen en nieuwe versies bij te werken. Toch brengt dit gebruiksgemak een belangrijk risico met zich mee. Omdat mods vaak door verschillende ontwikkelaars worden gemaakt en niet altijd volledig compatibel zijn, kan een installatieconflict leiden tot ernstige problemen. Zo kan een mod bepaalde bestanden overschrijven die door een andere mod worden gebruikt, of wijzigingen aanbrengen aan configuratiebestanden die essentieel zijn voor het opstarten van het spel. In sommige gevallen resulteert dit in een crashende of niet-startende game. In het ergste geval kan dit zelfs leiden tot de corruptie van savegames of voortgangsbestanden.
+
+Voor veel spelers zonder diepgaande technische kennis is het herstellen van dergelijke situaties moeilijk of zelfs onmogelijk. De structuur van een game-installatie met tientallen of honderden gemodificeerde bestanden is complex, en fouten zijn zelden eenvoudig te herleiden tot één enkele mod. Vaak blijft er dan slechts één optie over: het volledig verwijderen en opnieuw installeren van het spel en alle gewenste mods, een proces dat vele uren kan kosten en waarbij persoonlijke voortgang verloren gaat. Dit zorgt niet alleen voor frustratie bij spelers, maar leidt ook tot bijkomende druk op modontwikkelaars, die regelmatig klachten ontvangen over problemen die niet door hun eigen mods worden veroorzaakt.
+
+Het fundamentele probleem is dat modlaunchers zoals CKAN geen robuust mechanisme bevatten om gebruikers te beschermen tegen dataverlies. In tegenstelling tot professionele softwarebeheersystemen, waarin back-ups en rollbackfuncties standaard zijn, moeten modders en spelers het stellen zonder automatische herstelopties. Wanneer een installatie misloopt, is er geen eenvoudige manier om terug te keren naar een vorige stabiele staat van de game. Dit tekort wordt extra problematisch door de grootte van moderne mods: pakketten zoals Real Solar System Reborn kunnen tot veertig gigabyte aan data omvatten, waardoor manuele back-ups onpraktisch en tijdrovend worden.
+
+Hoewel de community regelmatig tijdelijke oplossingen biedt, zoals het handmatig kopiëren van spelmappen of het gebruik van externe back-uptools, ontbreekt een geïntegreerd, betrouwbaar en gebruiksvriendelijk systeem. Bovendien is de bestaande kennis over dit probleem nog erg versnipperd en gebaseerd op losse ervaringen. Er bestaat weinig onderzoek naar hoe vaak dergelijke corrupties voorkomen, welke factoren eraan bijdragen en hoe een structurele oplossing eruit zou kunnen zien. Dit vormt een leegte binnen het domein van game software engineering, waar de aandacht voornamelijk gaat naar het ontwikkelen van nieuwe features, en zelden naar de duurzaamheid en betrouwbaarheid van moddingtools.
+
+De doelgroep van dit onderzoek bestaat voornamelijk uit ontwikkelaars van modlaunchers en gevorderde gebruikers binnen moddingcommunities. Zij hebben behoefte aan een beter inzicht in de risico’s van dataverlies en aan praktische richtlijnen om veilige installatieomgevingen te ontwerpen. De bachelorproef richt zich daarbij specifiek op het ontwerpen en evalueren van een robuust back-up- en rollbackmechanisme dat geïntegreerd kan worden binnen CKAN, maar waarvan de principes ook toepasbaar zijn op andere modlaunchers zoals Prism Launcher voor Minecraft en R2ModMan.
+
+De centrale onderzoeksvraag luidt dan:
+
+\textbf{Hoe kan een robuust en efficiënt back-up- en rollbackmechanisme worden ontworpen voor modlaunchers zoals CKAN, zodat dataverlies en corruptie voorkomen kunnen worden zonder negatieve impact op performantie of gebruiksvriendelijkheid?}
+
+Om deze hoofdvraag te beantwoorden worden volgende deelvragen onderzocht:
+
+\begin{enumerate}
+    \item Hoe complex is het om manueel kapotte game-installaties of corrupte savegames op te lossen?
+    
+    \item Welke vormen van dataverlies en corruptie komen het vaakst voor bij modlaunchers zonder ingebouwd back-up- of rollbackmechanisme?
+
+    \item Welke technische methoden bestaan er om efficiënte back-up- en rollbacksystemen te implementeren in softwaretoepassingen?
+
+    \item Welke aanpak biedt de beste balans tussen opslagruimte, snelheid en betrouwbaarheid voor het back-uppen van grote modinstallaties?
+
+    \item Hoe kan een dergelijk systeem gebruiksvriendelijk geïntegreerd worden in bestaande modlaunchers, zoals CKAN voor Kerbal Space Program?
+\end{enumerate}
+
+De doelstelling van deze bachelorproef is om niet enkel een technisch werkend prototype af te leveren, maar ook om een reeks richtlijnen te formuleren die modlauncherontwikkelaars kunnen helpen om betrouwbare herstelmechanismen te integreren in hun software. Het uiteindelijke resultaat moet zorgen voor een stabielere en gebruiksvriendelijkere moddingervaring. Door deze kennis te bundelen in een concreet onderzoeksproject wil de bachelorproef een brug maken tussen academische inzichten uit software engineering en de praktijkgerichte noden van de moddinggemeenschap.
+
+%---------- Stand van zaken ---------------------------------------------------
+
+\section{Literatuurstudie}%
+\label{sec:literatuurstudie}
+
+\subsection{Back-uptechnieken}
+
+Een volledige back-up maakt een volledige kopie van het systeem of de dataset. Deze methode garandeert een eenvoudige terugplaatsing, maar vergt veel tijd en opslagruimte \autocite{Storer2008}. Daarom wordt ze vaak gecombineerd met efficiëntere technieken zoals incrementele back-ups, waarbij enkel bestanden die sinds de vorige back-up gewijzigd zijn, opnieuw worden gekopieerd \autocite{Sauer2019}. Hierdoor verkorten de uitvoeringstijd en de benodigde opslag aanzienlijk, al kan het herstel trager verlopen, omdat meerdere incrementele sets opeenvolgend moeten worden toegepast om de originele toestand te reconstrueren.
+
+Naast deze traditionele methoden bestaan er ook verschillen in de manier waarop data wordt gelezen en opgeslagen. Bestandsgebaseerde back-ups werken op logisch niveau en kopiëren bestanden zoals ze door het besturingssysteem worden gepresenteerd. Dit maakt ze draagbaar en eenvoudig te gebruiken, maar ze kunnen traag zijn bij grote aantallen kleine bestanden \autocite{Tanenbaum2015}. Daarentegen opereren blokgebaseerde back-ups op fysiek niveau en kopiëren ruwe schijfblokken rechtstreeks. Deze aanpak is doorgaans sneller bij sequentiële lees- en schrijfbewerkingen, maar maakt het terugzetten complexer omdat de structuur van bestanden en mappen opnieuw moet worden geïnterpreteerd. Bovendien kunnen blokgebaseerde back-ups inconsistenties vertonen als bestanden tijdens de kopie worden gewijzigd \autocite{Zheng2018}.
+
+Om deze inconsistenties te voorkomen, maken veel moderne systemen gebruik van snapshots. Een snapshot is een bevroren, alleen-lezen kopie van het bestandssysteem op een bepaald tijdstip. Het concept van copy-on-write zorgt ervoor dat wijzigingen na het maken van de snapshot naar nieuwe opslagblokken worden geschreven, terwijl de originele toestand behouden blijft \autocite{Nakamura2020}. Snapshots hebben als voordeel dat ze snel kunnen worden gemaakt en hersteld, en dat gebruikers tijdens het proces gewoon kunnen doorwerken. Het nadeel is dat ze extra opslagruimte vragen naarmate meer veranderingen plaatsvinden.
+
+Een evolutie van dit principe vinden we in continue of cloud-gebaseerde back-ups. Deze voeren automatisch frequente of permanente back-ups uit naar externe opslaglocaties. Ze minimaliseren het risico op gegevensverlies, maar introduceren afhankelijkheden van netwerkbandbreedte en externe dienstverleners \autocite{McBride2020}.
+
+\subsection{Rollback- en hersteltechnieken}
+
+Naast het maken van kopieën is het kunnen herstellen van een vorige, stabiele toestand minstens even belangrijk. Binnen besturingssystemen en databases worden hiervoor verschillende strategieën gebruikt.
+
+Veel moderne bestandssystemen, zoals NTFS en ext4, gebruiken journaling om de consistentie van data te garanderen. Daarbij worden alle wijzigingen eerst weggeschreven naar een logboek voordat ze effectief worden uitgevoerd. Na een systeemcrash kan het systeem door het logboek te herhalen snel worden hersteld zonder een volledige schijfcontrole \autocite{Nakamura2020}. Journaling verkort de hersteltijd drastisch, maar introduceert extra schrijfactiviteiten die prestaties kunnen beïnvloeden, vooral bij systemen met veel kleine updates.
+
+In databases wordt een vergelijkbaar principe toegepast in de vorm van transactionele logging. Het zogeheten write-ahead log registreert alle bewerkingen nog vóór ze worden toegepast, zodat het systeem bij een fout exact weet welke transacties onvolledig waren. Bij herstel worden de voltooide bewerkingen opnieuw uitgevoerd (redo), terwijl onvoltooide acties worden teruggedraaid (undo) \autocite{Takdir2025}. Deze methode maakt een nauwkeurig herstel mogelijk, bijvoorbeeld tot een specifiek punt in de tijd, maar vergt een zorgvuldig beheer van logbestanden die snel groot kunnen worden.
+
+Een eenvoudigere, maar in veel toepassingen effectieve aanpak is snapshot-rollback. Hierbij wordt de volledige toestand van een systeem hersteld naar het moment waarop een snapshot werd gemaakt \autocite{BtrfsDevelopers2025}. Dit type rollback is bijzonder gebruiksvriendelijk en snel, maar beperkt zich tot de beschikbare herstelpunten. Tussenliggende wijzigingen na de snapshot kunnen verloren gaan, waardoor het altijd een aanvulling moet zijn op een volwaardig back-upsysteem.
+
+\subsection{Vergelijking en uitdagingen}
+
+De besproken technieken tonen dat geen enkele methode universeel de beste keuze is. Volledige back-ups bieden zekerheid, maar zijn traag en duur. Incrementele back-ups zijn efficiënter, maar maken het herstelproces complexer. Snapshot-gebaseerde methoden en journaling zorgen voor snelle hersteltijden, maar vragen extra opslagruimte of leiden tot prestatieverlies. Cloud- en continue back-ups verkorten de tijd tussen back-ups, maar zijn sterk afhankelijk van netwerkbandbreedte.
+
+Uit de literatuur blijkt dat in de praktijk vaak hybride oplossingen worden toegepast: bijvoorbeeld een periodieke volledige back-up gecombineerd met frequente incrementele updates of snapshots  \autocite{McBride2020}. De uitdaging blijft om de juiste balans te vinden tussen betrouwbaarheid, prestaties en opslagverbruik, afhankelijk van de toepassing.
+
+Voor modlaunchers en andere consumententoepassingen is vooral gebruiksgemak cruciaal. Een effectief systeem moet snel herstel mogelijk maken zonder dat de gebruiker technische kennis nodig heeft. 
+
+% Voor literatuurverwijzingen zijn er twee belangrijke commando's:
+% \autocite{KEY} => (Auteur, jaartal) Gebruik dit als de naam van de auteur
+%   geen onderdeel is van de zin.
+% \textcite{KEY} => Auteur (jaartal)  Gebruik dit als de auteursnaam wel een
+%   functie heeft in de zin (bv. ``Uit onderzoek door Doll & Hill (1954) bleek
+%   ...'')
+
+%---------- Methodologie ------------------------------------------------------
+\section{Methodologie}%
+\label{sec:methodologie}
+
+\subsection{Fase 1: Probleemanalyse en dataverzameling}
+
+De eerste fase van het onderzoek richt zich op het in kaart brengen van de aard en frequentie van fouten die optreden tijdens het gebruik van modlaunchers. Hiervoor worden online moddingcommunities en fora geanalyseerd, waaronder Reddit, GitHub en Steam. Deze platformen bevatten duizenden posts van spelers die problemen ondervinden bij het installeren of updaten van mods. Door deze posts te onderzoeken, kan een beeld gevormd worden van de meest voorkomende vormen van dataverlies en corruptie.
+
+De verzamelde informatie wordt vervolgens geclassificeerd volgens het type fout, zoals corrupte configuratiebestanden, conflicten tussen afhankelijkheden of beschadigde opslagdata. Op basis van deze data kan bepaald worden hoe vaak elk type probleem voorkomt en welke patronen zich daarbij tonen. Dit maakt het mogelijk om de impact van het ontbreken van herstelmechanismen te meten en om aan te tonen dat het hier niet om afzonderlijke incidenten gaat, maar om een terugkerend structureel probleem in de betrouwbaarheid van modlaunchers.
+
+\subsection{Fase 2: Technische analyse en theoretisch kader}
+
+Na de probleemidentificatie volgt een onderzoek naar bestaande back-up- en rollbacktechnieken. In deze fase worden onder andere methoden zoals snapshotting, incrementele back-ups en deduplicatie bestudeerd. De sterktes en zwaktes van elk systeem worden geëvalueerd aan de hand van vier criteria: opslagruimte, snelheid, betrouwbaarheid en fouttolerantie.
+
+Daarbij wordt ook aandacht besteed aan de toepasbaarheid van deze methoden in modlaunchers. Modbestanden verschillen immers sterk in grootte en structuur, sommige mods bevatten enkel configuratiebestanden, terwijl andere meerdere gigabytes aan assets omvatten. De analyse heeft tot doel een set van ontwerprichtlijnen te formuleren die bepalen welke strategie het meest geschikt is om modinstallaties efficiënt te kunnen back-uppen en herstellen.
+
+\subsection{Fase 3: Ontwerp en ontwikkeling van het prototype}
+
+Op basis van de theoretische resultaten wordt in de derde fase een proof-of-concept ontwikkeld. Dit prototype bestaat uit een modulaire back-up- en rollbackmodule die compatibel is met CKAN of een vergelijkbare modlauncher. De module wordt geschreven in een programmeertaal die goed aansluit bij het bestaande ecosysteem, voor CKAN zou dit C\# zijn. Daarnaast wordt er aandacht besteed aan gebruiksvriendelijkheid, de interface moet intuïtief zijn voor spelers met beperkte technische kennis en moet passen in de workflow van de modlauncher.
+
+\subsection{Fase 4: Evaluatie en validatie}
+
+De laatste fase van het onderzoek richt zich op de evaluatie van het ontwikkelde prototype. Hiervoor worden meerdere testscenario’s opgesteld met verschillende modpakketten van uiteenlopende grootte en complexiteit. Tijdens de experimenten worden metingen uitgevoerd van de back-upduur, de snelheid van rollback-operaties, het opslagverbruik en het geheugenverbruik.
+
+Daarnaast wordt nagegaan hoe betrouwbaar het systeem corrupte installaties kan herstellen. De meetresultaten worden vergeleken met een baseline zonder back-upmechanisme om de impact van de oplossing te kwantificeren. Deze gegevens worden vervolgens aangevuld met een beoordeling van de gebruiksvriendelijkheid, waarbij geanalyseerd wordt hoe eenvoudig eindgebruikers het systeem kunnen inzetten in een realistisch scenario.
+
+%---------- Verwachte resultaten ----------------------------------------------
+\section{Verwacht resultaat, conclusie}%
+\label{sec:verwachte_resultaten}
+
+\subsection{Verwachte inzichten uit de probleemanalyse}
+
+Op basis van de gekozen aanpak wordt verwacht dat de analyse van moddingfora en gebruikersrapporten duidelijk zal aantonen dat fouten en corruptie bij modinstallaties een veelvoorkomend probleem is. Door concreet te bekijken hoe vaak dit voorkomt en in welke situaties, kan een goed beeld gevormd worden van waar het fout loopt.
+
+Daarnaast zal de analyse ook helpen om beter te begrijpen welke gevolgen dit heeft voor de spelers en de ontwikkelaars. Veel modontwikkelaars krijgen klachten over bugs of crashes waar ze eigenlijk niets mee te maken hebben. De verwachting is dan ook dat het onderzoek aantoont dat het ontbreken van herstelopties niet alleen een technisch probleem is, maar ook een bron van frustratie en misverstanden binnen moddingcommunities.
+
+\subsection{Verwachte bevindingen uit de technische analyse}
+
+Tijdens het onderzoek naar bestaande back-up- en herstelmethoden wordt verwacht dat er technieken naar voren zullen komen die goed aansluiten bij de noden van modlaunchers. Vooral incrementele back-ups, waarbij enkel de wijzigingen worden opgeslagen, lijken een veelbelovende richting. Door dit te combineren met technieken zoals compressie en controlesommen (checksums), kan vermoedelijk een systeem worden ontworpen dat snel werkt, weinig opslagruimte vraagt en toch betrouwbaar blijft.
+
+\subsection{Verwachte prestaties van het prototype}
+
+Het proof-of-concept zal dienen als experimenteel bewijs van de haalbaarheid van een geïntegreerd herstelmechanisme binnen een modlauncher. Er wordt verwacht dat het prototype in staat zal zijn om automatisch snapshots te genereren en een rollback uit te voeren met minimale gebruikersinteractie. De prestaties zullen gemeten worden in termen van hersteltijd, opslagbesparing en foutdetectienauwkeurigheid. De hypothese is dat het prototype in staat zal zijn om een volledige rollback uit te voeren in minder dan tien procent van de tijd die een manuele herinstallatie vereist, terwijl het opslagverbruik van de back-up beperkt blijft tot ten hoogste twintig procent extra opslagruimte ten opzichte van de originele installatie.
+
+\subsection{Verwachte meerwaarde voor de moddinggemeenschap}
+
+Naast de technische resultaten wordt ook verwacht dat dit onderzoek iets zal opleveren voor alle moddingcommunities. Een goed uitgewerkt herstelmechanisme zou het vertrouwen van spelers in modlaunchers kunnen vergroten, omdat ze weten dat ze hun voortgang niet zomaar kwijt kunnen raken. Voor ontwikkelaars van mods betekent dit een lagere druk op ondersteuning, aangezien gebruikers veel problemen zelf kunnen oplossen met een rollbackfunctie.
+
+De meerwaarde van dit onderzoek ligt dus op verschillende niveaus. In de praktijk kan het prototype dienen als voorbeeld voor andere modlauncherontwikkelaars. Op technisch vlak biedt het nieuwe inzichten in hoe back-upsystemen kunnen worden toegepast in consumentensoftware. Verder kan het ook bijdragen aan een gezondere relatie tussen spelers en ontwikkelaars, waarin fouten niet langer leiden tot frustratie of wantrouwen.
+
+\subsection{Conclusie}
+
+Door te combineren wat we weten over dataherstel met de specifieke noden van moddingtools, wil dit onderzoek aantonen dat betrouwbaarheid en gebruiksgemak hand in hand kunnen gaan. Het project zal niet alleen een werkend prototype opleveren, maar ook duidelijke richtlijnen voor hoe modlaunchers in de toekomst veiliger kunnen worden ontworpen.
+
+Wanneer de resultaten worden gedeeld met de moddingcommunities, kan dit project een startpunt vormen voor verdere verbeteringen aan tools zoals CKAN, Prism launcher of R2ModMan. Op langere termijn kan dit zelfs bijdragen aan een meer gestandaardiseerde aanpak voor back-up en herstel binnen moddingsoftware, waardoor spelers met meer vertrouwen hun games kunnen aanpassen en uitbreiden.
+
