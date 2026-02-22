@@ -26,5 +26,30 @@
 %% Maak voor elke fase (behalve het literatuuronderzoek) een NIEUW HOOFDSTUK aan
 %% en geef het een gepaste titel.
 
-\lipsum[21-25]
+\section{\IfLanguageName{dutch}{Fase 1: Probleemanalyse en dataverzameling}{Fase 1: Problemanalysis and datacollection}}%
+\label{sec:fase1-probleemanalyse}
 
+De eerste fase van het onderzoek richt zich op het in kaart brengen van de aard en frequentie van fouten die optreden tijdens het gebruik van modlaunchers. Hiervoor worden online moddingcommunities en fora geanalyseerd, waaronder Reddit, GitHub en Steam. Deze platformen bevatten duizenden posts van spelers die problemen ondervinden bij het installeren of updaten van mods. Door deze posts te onderzoeken, kan een beeld gevormd worden van de meest voorkomende vormen van dataverlies en corruptie.
+
+De verzamelde informatie wordt vervolgens geclassificeerd volgens het type fout, zoals corrupte configuratiebestanden, conflicten tussen afhankelijkheden of beschadigde opslagdata. Op basis van deze data kan bepaald worden hoe vaak elk type probleem voorkomt en welke patronen zich daarbij tonen. Dit maakt het mogelijk om de impact van het ontbreken van herstelmechanismen te meten en om aan te tonen dat het hier niet om afzonderlijke incidenten gaat, maar om een terugkerend structureel probleem in de betrouwbaarheid van modlaunchers.
+
+Als laatste zal in deze fase een complexiteitsanalyse gedaan worden om te bepalen hoe moeilijk het is om manueel kapotte game-installaties of corrupte save-games op te lossen.
+
+\section{\IfLanguageName{dutch}{Fase 2: Technische analyse}{Fase 2: Technical analysis}}%
+\label{sec:fase2-technischeanalyse}
+
+Na de probleemidentificatie volgt een onderzoek naar bestaande back-up- en rollbacktechnieken. In deze fase worden onder andere methoden zoals snapshotting, incrementele back-ups en deduplicatie bestudeerd. De sterktes en zwaktes van elk systeem worden geëvalueerd aan de hand van vier criteria: opslagruimte, snelheid, betrouwbaarheid en fouttolerantie.
+
+Daarbij wordt ook aandacht besteed aan de toepasbaarheid van deze methoden in modlaunchers. Modbestanden verschillen immers sterk in grootte en structuur, sommige mods bevatten enkel configuratiebestanden, terwijl andere meerdere gigabytes aan assets omvatten. De analyse heeft tot doel een set van ontwerprichtlijnen te formuleren die bepalen welke strategie het meest geschikt is om modinstallaties efficiënt te kunnen back-uppen en herstellen.
+
+\section{\IfLanguageName{dutch}{Fase 3: Ontwerp en ontwikkeling van het prototype}{Fase 3: Design and development of prototype}}%
+\label{sec:fase3-prototype}
+
+Op basis van de theoretische resultaten wordt in de derde fase een proof-of-concept ontwikkeld. Dit prototype bestaat uit een modulaire back-up- en rollbackmodule die compatibel is met CKAN of een vergelijkbare modlauncher. De module wordt geschreven in een programmeertaal die goed aansluit bij het bestaande ecosysteem, voor CKAN zou dit C\# zijn. Daarnaast wordt er aandacht besteed aan gebruiksvriendelijkheid, de interface moet intuïtief zijn voor spelers met beperkte technische kennis en moet passen in de workflow van de modlauncher.
+
+\section{\IfLanguageName{dutch}{Fase 4: Evaluatie en validatie}{Fase 4: Evaluation and validation}}%
+\label{sec:fase4-evaluatie}
+
+De laatste fase van het onderzoek richt zich op de evaluatie van het ontwikkelde prototype. Hiervoor worden meerdere testscenario’s opgesteld met verschillende modpakketten van uiteenlopende grootte en complexiteit. Tijdens de experimenten worden metingen uitgevoerd van de back-upduur, de snelheid van rollback-operaties, het opslagverbruik en het geheugenverbruik.
+
+Daarnaast wordt nagegaan hoe betrouwbaar het systeem corrupte installaties kan herstellen. De meetresultaten worden vergeleken met een baseline zonder back-upmechanisme om de impact van de oplossing te kwantificeren. Deze gegevens worden vervolgens aangevuld met een beoordeling van de gebruiksvriendelijkheid, waarbij geanalyseerd wordt hoe eenvoudig eindgebruikers het systeem kunnen inzetten in een realistisch scenario.

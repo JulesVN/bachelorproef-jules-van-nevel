@@ -7,45 +7,66 @@
 
 % Pas na deze inleidende paragraaf komt de eerste sectiehoofding.
 
-Dit hoofdstuk bevat je literatuurstudie. De inhoud gaat verder op de inleiding, maar zal het onderwerp van de bachelorproef *diepgaand* uitspitten. De bedoeling is dat de lezer na lezing van dit hoofdstuk helemaal op de hoogte is van de huidige stand van zaken (state-of-the-art) in het onderzoeksdomein. Iemand die niet vertrouwd is met het onderwerp, weet nu voldoende om de rest van het verhaal te kunnen volgen, zonder dat die er nog andere informatie moet over opzoeken \autocite{Pollefliet2011}.
+In dit hoofdstuk worden de voornaamste back-up- en rollback-technieken besproken die relevant zijn voor het beheer van game-mods. Eerst worden verschillende soorten back-upmethoden (volledige, incrementele, differentiële, enzovoort) bekeken, vervolgens mechanismen voor herstel en terugzetten van data. Bij de keuze van technieken spelen factoren mee zoals betrouwbaarheid, snelheid van herstel en gebruiksgemak. Dit vormt de theoretische basis voor het ontwerp van het prototype in de volgende hoofdstukken.
 
-Je verwijst bij elke bewering die je doet, vakterm die je introduceert, enz.\ naar je bronnen. In \LaTeX{} kan dat met het commando \texttt{$\backslash${textcite\{\}}} of \texttt{$\backslash${autocite\{\}}}. Als argument van het commando geef je de ``sleutel'' van een ``record'' in een bibliografische databank in het Bib\LaTeX{}-formaat (een tekstbestand). Als je expliciet naar de auteur verwijst in de zin (narratieve referentie), gebruik je \texttt{$\backslash${}textcite\{\}}. Soms is de auteursnaam niet expliciet een onderdeel van de zin, dan gebruik je \texttt{$\backslash${}autocite\{\}} (referentie tussen haakjes). Dit gebruik je bv.~bij een citaat, of om in het bijschrift van een overgenomen afbeelding, broncode, tabel, enz. te verwijzen naar de bron. In de volgende paragraaf een voorbeeld van elk.
+\section{\IfLanguageName{dutch}{Back-uptechnieken}{Backup techniques}}%
+\label{sec:backuptechnieken}
 
-\textcite{Knuth1998} schreef een van de standaardwerken over sorteer- en zoekalgoritmen. Experten zijn het erover eens dat cloud computing een interessante opportuniteit vormen, zowel voor gebruikers als voor dienstverleners op vlak van informatietechnologie~\autocite{Creeger2009}.
+\subsection{\IfLanguageName{dutch}{Volledige back-up}{Complete backup}}%
+\label{subsec:volledigebackup}
 
-Let er ook op: het \texttt{cite}-commando voor de punt, dus binnen de zin. Je verwijst meteen naar een bron in de eerste zin die erop gebaseerd is, dus niet pas op het einde van een paragraaf.
+Een volledige back-up maakt een exacte kopie van alle geselecteerde data op een back-upmedium (bijvoorbeeld een schijf of tape). Het grote voordeel is dat bij herstel slechts één set opgeslagen data nodig is, wat de hersteltijd minimaliseert. Een nadeel is dat het proces veel tijd en opslagruimte vergt, zeker bij grote hoeveelheden data. Daarom is het gebruikelijk om met volledige back-ups te werken in combinatie met andere methoden, zodat niet telkens alle data opnieuw gekopieerd hoeft te worden. \autocite{Sullivan2025}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\textwidth]{grail.jpg}
-  \caption[Voorbeeld figuur.]{\label{fig:grail}Voorbeeld van invoegen van een figuur. Zorg altijd voor een uitgebreid bijschrift dat de figuur volledig beschrijft zonder in de tekst te moeten gaan zoeken. Vergeet ook je bronvermelding niet!}
-\end{figure}
+\subsection{\IfLanguageName{dutch}{Incrementele back-up}{Incremental backup}}%
+\label{subsec:incrementelebackup}
 
-\begin{listing}
-  \begin{minted}{python}
-    import pandas as pd
-    import seaborn as sns
+Een incrementele back-up kopieert alleen de bestanden die sinds de laatste back-up (volledig of incrementeel) zijn gewijzigd \autocite{Sauer2019}. Dit resulteert in aanzienlijk kleinere en snellere back-ups dan telkens volledig kopiëren. Het nadeel is dat het terugzetten ingewikkelder wordt: om de laatste staat te herstellen moet eerst de laatste volledige back-up en vervolgens álle tussenliggende incrementele back-ups worden toegepast. Als er een schijf ontbreekt of beschadigd is, kan herstel soms niet volledig zijn. In de praktijk worden daarom vaak één keer per week of maand een volledige back-up gemaakt, aangevuld met dagelijkse incrementele back-ups. \autocite{Chervenak1998}
 
-    penguins = sns.load_dataset('penguins')
-    sns.relplot(data=penguins, x="flipper_length_mm", y="bill_length_mm", hue="species")
-  \end{minted}
-  \caption[Voorbeeld codefragment]{Voorbeeld van het invoegen van een codefragment.}
-\end{listing}
+\subsection{\IfLanguageName{dutch}{Differentiële back-up}{Differential backup}}%
+\label{subsec:differentielebackup}
 
-\lipsum[7-20]
+Een differentiële back-up ligt tussen volledig en incrementeel in. Hierbij worden bij elke back-up alle wijzigingen sinds de laatste volledige back-up opgeslagen. Dit betekent dat een differentiële back-up doorgaans meer data bevat dan een incrementele, maar sneller te herstellen is omdat er maximaal twee bestanden nodig zijn (de laatste volledige en de laatste differentiële). Bij toenemende tijd kan de omvang van een differentiële back-up wel flink toenemen, omdat alle wijzigingen sinds de volledige kopie accumuleren. In scenario’s waar snelle restores cruciaal zijn, zoals bij ernstige systeemstoringen, kan differentieel gunstiger zijn dan incrementeel. \autocite{Sullivan2025}
 
-\begin{table}
-  \centering
-  \begin{tabular}{lcr}
-    \toprule
-    \textbf{Kolom 1} & \textbf{Kolom 2} & \textbf{Kolom 3} \\
-    $\alpha$         & $\beta$          & $\gamma$         \\
-    \midrule
-    A                & 10.230           & a                \\
-    B                & 45.678           & b                \\
-    C                & 99.987           & c                \\
-    \bottomrule
-  \end{tabular}
-  \caption[Voorbeeld tabel]{\label{tab:example}Voorbeeld van een tabel.}
-\end{table}
+\subsection{\IfLanguageName{dutch}{Bestand- versus blokgebaseerde back-up}{File-based versus block-based backup}}%
+\label{subsec:bestandvsblok}
 
+Naast deze traditionele methoden bestaan er ook verschillen in de manier waarop data wordt gelezen en opgeslagen. Bestandsgebaseerde back-ups werken op logisch niveau en kopiëren bestanden zoals ze door het besturingssysteem worden gepresenteerd. Dit maakt ze draagbaar en eenvoudig te gebruiken, maar ze kunnen traag zijn bij grote aantallen kleine bestanden \autocite{Tanenbaum2015}. Daarentegen opereren blokgebaseerde back-ups op fysiek niveau en kopiëren ruwe schijfblokken rechtstreeks. Deze aanpak is doorgaans sneller bij sequentiële lees- en schrijfbewerkingen, maar maakt het terugzetten complexer omdat de structuur van bestanden en mappen opnieuw moet worden geïnterpreteerd. Bovendien kunnen blokgebaseerde back-ups inconsistenties vertonen als bestanden tijdens de kopie worden gewijzigd \autocite{Zheng2018}.
+
+\subsection{Snapshots}%
+\label{subsec:snapshots}
+
+Om deze inconsistenties te voorkomen, maken veel moderne systemen gebruik van snapshots. Een snapshot is een bevroren, alleen-lezen kopie van het bestandssysteem op een bepaald tijdstip. Het concept van copy-on-write zorgt ervoor dat wijzigingen na het maken van de snapshot naar nieuwe opslagblokken worden geschreven, terwijl de originele toestand behouden blijft \autocite{Nakamura2020}. Snapshots hebben als voordeel dat ze snel kunnen worden gemaakt en hersteld, en dat gebruikers tijdens het proces gewoon kunnen doorwerken. Het nadeel is dat ze extra opslagruimte vragen naarmate meer veranderingen plaatsvinden.
+
+\subsection{\IfLanguageName{dutch}{Continue en online back-up}{Continuous and online backup}}%
+\label{subsec:continue-online}
+
+Bij continue data protection (CDP) wordt elk wijzigingselement vrijwel direct geback-upt. In effect legt een dergelijk systeem een gedetailleerd logboek aan van alle datatransacties, waardoor herstel tot een willekeurig punt in het verleden mogelijk is. CDP maakt snelle herstelling mogelijk (herstel gebeurt binnen seconden) omdat er te allen tijde een vrijwel actuele kopie beschikbaar is \autocite{Barney2024}. Dit vereist echter wel een continue infrastructuur (vaak met constante netwerkverbinding) en kan complex zijn voor simpele applicaties. In een bredere context vallen onder online back-ups ook cloud-gebaseerde back-ups: data wordt (al dan niet frequent) naar externe opslag via internet verzonden. Dergelijke oplossingen bieden schaalbaarheid en off-site bescherming, maar zijn afhankelijk van internetverbinding en derden \autocite{Kirvan2023}. In de cloudomgeving worden daarom meestal incrementele of ‘incremental-forever’ schema’s gebruikt, omdat die minder bandbreedte en opslag vergen \autocite{Sullivan2025}. Het grote nadeel van cloud-back-ups is dat de initiële volledige back-up veel tijd kan kosten en dat bandbreedte een bottleneck wordt voor grote datasets. \autocite{Kirvan2023}
+
+\section{\IfLanguageName{dutch}{Rollback- en hersteltechnieken}{Rollback and recover techniques}}%
+\label{sec:rollback-en-hersteltechnieken}
+
+Naast het maken van kopieën is het kunnen herstellen van een vorige, stabiele toestand minstens even belangrijk. Binnen besturingssystemen en databases worden hiervoor verschillende strategieën gebruikt.
+
+\subsection{\IfLanguageName{dutch}{Journaling (bestandssystemen)}{Journaling (filesystems)}}%
+\label{subsec:journaling}
+
+Veel moderne bestandssystemen, zoals NTFS en ext4, gebruiken journaling om de consistentie van data te garanderen. Daarbij worden alle wijzigingen eerst weggeschreven naar een logboek voordat ze effectief worden uitgevoerd. Na een systeemcrash kan het systeem door het logboek te herhalen snel worden hersteld zonder een volledige schijfcontrole \autocite{Nakamura2020}. Journaling verkort de hersteltijd drastisch, maar introduceert extra schrijfactiviteiten die prestaties kunnen beïnvloeden, vooral bij systemen met veel kleine updates.
+
+\subsection{\IfLanguageName{dutch}{Transactionele log (databases)}{Transactional log (databases)}}%
+\label{subsec:transactionele-log}
+
+In databases wordt een vergelijkbaar principe toegepast in de vorm van transactionele logging. Het zogeheten write-ahead log registreert alle bewerkingen nog vóór ze worden toegepast, zodat het systeem bij een fout exact weet welke transacties onvolledig waren. Bij herstel worden de voltooide bewerkingen opnieuw uitgevoerd (redo), terwijl onvoltooide acties worden teruggedraaid (undo) \autocite{Takdir2025}. Deze methode maakt een nauwkeurig herstel mogelijk, bijvoorbeeld tot een specifiek punt in de tijd, maar vergt een zorgvuldig beheer van logbestanden die snel groot kunnen worden.
+
+\subsection{Snapshot rollback}%
+\label{subsec:snapshot-rollback}
+
+Een eenvoudigere, maar in veel toepassingen effectieve aanpak is snapshot-rollback. Hierbij wordt de volledige toestand van een systeem hersteld naar het moment waarop een snapshot werd gemaakt \autocite{BtrfsDevelopers2025}. Dit type rollback is bijzonder gebruiksvriendelijk en snel, maar beperkt zich tot de beschikbare herstelpunten. Tussenliggende wijzigingen na de snapshot kunnen verloren gaan, waardoor het altijd een aanvulling moet zijn op een volwaardig back-upsysteem.
+
+\section{\IfLanguageName{dutch}{Vergelijking en uitdagingen}{Comparisons and challenges}}%
+\label{sec:vergelijkingen-uitdagingen}
+
+De besproken technieken tonen dat geen enkele methode universeel de beste keuze is. Volledige back-ups bieden zekerheid, maar zijn traag en duur. Incrementele back-ups zijn efficiënter, maar maken het herstelproces complexer. Snapshot-gebaseerde methoden en journaling zorgen voor snelle hersteltijden, maar vragen extra opslagruimte of leiden tot prestatieverlies. Cloud- en continue back-ups verkorten de tijd tussen back-ups, maar zijn sterk afhankelijk van netwerkbandbreedte.
+
+Uit de literatuur blijkt dat in de praktijk vaak hybride oplossingen worden toegepast: bijvoorbeeld een periodieke volledige back-up gecombineerd met frequente incrementele updates of snapshots  \autocite{McBride2020}. De uitdaging blijft om de juiste balans te vinden tussen betrouwbaarheid, prestaties en opslagverbruik, afhankelijk van de toepassing.
+
+Voor modlaunchers en andere consumententoepassingen is vooral gebruiksgemak cruciaal. Een effectief systeem moet snel herstel mogelijk maken zonder dat de gebruiker technische kennis nodig heeft.

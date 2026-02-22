@@ -5,32 +5,47 @@
 \chapter{\IfLanguageName{dutch}{Inleiding}{Introduction}}%
 \label{ch:inleiding}
 
-De inleiding moet de lezer net genoeg informatie verschaffen om het onderwerp te begrijpen en in te zien waarom de onderzoeksvraag de moeite waard is om te onderzoeken. In de inleiding ga je literatuurverwijzingen beperken, zodat de tekst vlot leesbaar blijft. Je kan de inleiding verder onderverdelen in secties als dit de tekst verduidelijkt. Zaken die aan bod kunnen komen in de inleiding~\autocite{Pollefliet2011}:
-
-\begin{itemize}
-  \item context, achtergrond
-  \item afbakenen van het onderwerp
-  \item verantwoording van het onderwerp, methodologie
-  \item probleemstelling
-  \item onderzoeksdoelstelling
-  \item onderzoeksvraag
-  \item \ldots
-\end{itemize}
+Game modding vormt vandaag een belangrijk onderdeel van de hedendaagse gamecultuur. Het geeft spelers de mogelijkheid om bestaande spellen aan te passen of uit te breiden met nieuwe content, functionaliteiten en zelfs bug fixes. Dankzij modding blijven games vaak jarenlang relevant en ontstaan er gemeenschappen (communities) waarin spelers niet enkel consumenten zijn, maar ook ontwikkelaars en ontwerpers. Om dit proces te ondersteunen maken veel spelers gebruik van zogenaamde modlaunchers, dit zijn programma’s die de installatie, configuratie en het updaten van mods automatiseren. Een van de bekendere voorbeelden hiervan is het Comprehensive Kerbal Archive Network (CKAN), de modlauncher voor het ruimtevaartspel Kerbal Space Program.
 
 \section{\IfLanguageName{dutch}{Probleemstelling}{Problem Statement}}%
 \label{sec:probleemstelling}
 
-Uit je probleemstelling moet duidelijk zijn dat je onderzoek een meerwaarde heeft voor een concrete doelgroep. De doelgroep moet goed gedefinieerd en afgelijnd zijn. Doelgroepen als ``bedrijven,'' ``KMO's'', systeembeheerders, enz.~zijn nog te vaag. Als je een lijstje kan maken van de personen/organisaties die een meerwaarde zullen vinden in deze bachelorproef (dit is eigenlijk je steekproefkader), dan is dat een indicatie dat de doelgroep goed gedefinieerd is. Dit kan een enkel bedrijf zijn of zelfs één persoon (je co-promotor/opdrachtgever).
+CKAN laat gebruikers toe om met enkele muisklikken duizenden mods te installeren, afhankelijkheden automatisch op te lossen en nieuwe versies bij te werken. Toch brengt dit gebruiksgemak een belangrijk risico met zich mee. Omdat mods vaak door verschillende ontwikkelaars worden gemaakt en niet altijd volledig compatibel zijn, kan een installatieconflict leiden tot ernstige problemen. Zo kan een mod bepaalde bestanden overschrijven die door een andere mod worden gebruikt, of wijzigingen aanbrengen aan configuratiebestanden die essentieel zijn voor het opstarten van het spel. In sommige gevallen resulteert dit in een crashende of niet-startende game. In het ergste geval kan dit zelfs leiden tot de corruptie van savegames of voortgangsbestanden.
+
+Voor veel spelers zonder diepgaande technische kennis is het herstellen van dergelijke situaties moeilijk of zelfs onmogelijk. De structuur van een game-installatie met tientallen of honderden gemodificeerde bestanden is complex, en fouten zijn zelden eenvoudig te herleiden tot één enkele mod. Vaak blijft er dan slechts één optie over: het volledig verwijderen en opnieuw installeren van het spel en alle gewenste mods, een proces dat vele uren kan kosten en waarbij persoonlijke voortgang verloren gaat. Dit zorgt niet alleen voor frustratie bij spelers, maar leidt ook tot bijkomende druk op modontwikkelaars, die regelmatig klachten ontvangen over problemen die niet door hun eigen mods worden veroorzaakt.
+
+Het fundamentele probleem is dat modlaunchers zoals CKAN geen robuust mechanisme bevatten om gebruikers te beschermen tegen dataverlies. In tegenstelling tot professionele softwarebeheersystemen, waarin back-ups en rollbackfuncties standaard zijn, moeten modders en spelers het stellen zonder automatische herstelopties. Wanneer een installatie misloopt, is er geen eenvoudige manier om terug te keren naar een vorige stabiele staat van de game. Dit tekort wordt extra problematisch door de grootte van moderne mods: pakketten zoals Real Solar System Reborn kunnen tot veertig gigabyte aan data omvatten, waardoor manuele back-ups onpraktisch en tijdrovend worden.
+
+Hoewel de community regelmatig tijdelijke oplossingen biedt, zoals het handmatig kopiëren van spelmappen of het gebruik van externe back-uptools, ontbreekt een geïntegreerd, betrouwbaar en gebruiksvriendelijk systeem. Bovendien is de bestaande kennis over dit probleem nog erg versnipperd en gebaseerd op losse ervaringen. Er bestaat weinig onderzoek naar hoe vaak dergelijke corrupties voorkomen, welke factoren eraan bijdragen en hoe een structurele oplossing eruit zou kunnen zien. Dit vormt een leegte binnen het domein van game software engineering, waar de aandacht voornamelijk gaat naar het ontwikkelen van nieuwe features, en zelden naar de duurzaamheid en betrouwbaarheid van moddingtools.
+
+De doelgroep van dit onderzoek bestaat voornamelijk uit ontwikkelaars van modlaunchers en gevorderde gebruikers binnen moddingcommunities. Zij hebben behoefte aan een beter inzicht in de risico’s van dataverlies en aan praktische richtlijnen om veilige installatieomgevingen te ontwerpen. De bachelorproef richt zich daarbij specifiek op het ontwerpen en evalueren van een robuust back-up- en rollbackmechanisme dat geïntegreerd kan worden binnen CKAN, maar waarvan de principes ook toepasbaar zijn op andere modlaunchers zoals Prism Launcher voor Minecraft en R2ModMan.
+
 
 \section{\IfLanguageName{dutch}{Onderzoeksvraag}{Research question}}%
 \label{sec:onderzoeksvraag}
 
-Wees zo concreet mogelijk bij het formuleren van je onderzoeksvraag. Een onderzoeksvraag is trouwens iets waar nog niemand op dit moment een antwoord heeft (voor zover je kan nagaan). Het opzoeken van bestaande informatie (bv. ``welke tools bestaan er voor deze toepassing?'') is dus geen onderzoeksvraag. Je kan de onderzoeksvraag verder specifiëren in deelvragen. Bv.~als je onderzoek gaat over performantiemetingen, dan 
+De centrale onderzoeksvraag luidt dan:
+
+\textbf{Hoe kan een robuust en efficiënt back-up- en rollbackmechanisme worden ontworpen voor modlaunchers zoals CKAN, zodat dataverlies en corruptie voorkomen kunnen worden zonder negatieve impact op performantie of gebruiksvriendelijkheid?}
+
+Om deze hoofdvraag te beantwoorden worden volgende deelvragen onderzocht:
+
+\begin{enumerate}
+    \item Hoe complex is het om manueel kapotte game-installaties of corrupte savegames op te lossen?
+    
+    \item Welke vormen van dataverlies en corruptie komen het vaakst voor bij modlaunchers zonder ingebouwd back-up- of rollbackmechanisme?
+    
+    \item Welke technische methoden bestaan er om efficiënte back-up- en rollbacksystemen te implementeren in softwaretoepassingen?
+    
+    \item Welke aanpak biedt de beste balans tussen opslagruimte, snelheid en betrouwbaarheid voor het back-uppen van grote modinstallaties?
+    
+    \item Hoe kan een dergelijk systeem gebruiksvriendelijk geïntegreerd worden in bestaande modlaunchers, zoals CKAN voor Kerbal Space Program?
+\end{enumerate}
 
 \section{\IfLanguageName{dutch}{Onderzoeksdoelstelling}{Research objective}}%
 \label{sec:onderzoeksdoelstelling}
 
-Wat is het beoogde resultaat van je bachelorproef? Wat zijn de criteria voor succes? Beschrijf die zo concreet mogelijk. Gaat het bv.\ om een proof-of-concept, een prototype, een verslag met aanbevelingen, een vergelijkende studie, enz.
+De doelstelling van deze bachelorproef is om niet enkel een technisch werkend prototype af te leveren, maar ook om een reeks richtlijnen te formuleren die modlauncherontwikkelaars kunnen helpen om betrouwbare herstelmechanismen te integreren in hun software. Het uiteindelijke resultaat moet zorgen voor een stabielere en gebruiksvriendelijkere moddingervaring. Door deze kennis te bundelen in een concreet onderzoeksproject wil de bachelorproef een brug maken tussen academische inzichten uit software engineering en de praktijkgerichte noden van de moddinggemeenschap.
 
 \section{\IfLanguageName{dutch}{Opzet van deze bachelorproef}{Structure of this bachelor thesis}}%
 \label{sec:opzet-bachelorproef}
@@ -45,6 +60,12 @@ In Hoofdstuk~\ref{ch:stand-van-zaken} wordt een overzicht gegeven van de stand v
 
 In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de gebruikte onderzoekstechnieken besproken om een antwoord te kunnen formuleren op de onderzoeksvragen.
 
-% TODO: Vul hier aan voor je eigen hoofstukken, één of twee zinnen per hoofdstuk
+In Hoofdstuk~\ref{ch:probleemanalyse} wordt de aard en frequentie van problemen bij gebruikers in de moddingcommunity in kaart gebracht. Er wordt ook een complexiteitsanalyse gedaan van hoe ingewikkeld het is om zelf als gebruiker deze problemen op te lossen.
+
+In Hoofdstuk~\ref{ch:technischeanalyse} Worden verschillende back-up en rollback methodes onderzocht. Hier wordt een antwoord gegeven op welke methoden het best toepasbaar zijn in modlaunchers.
+
+In Hoofdstuk~\ref{ch:prototype} wordt het ontwerp van het prototype gemaakt en vindt de ontwikkeling ervan plaats.
+
+In Hoofdstuk~\ref{ch:evaluatie} vindt de laatste fase van het onderzoek zich plaats. Hier zal de effectiviteit van het prototype onderzocht en beoordeeld wor
 
 In Hoofdstuk~\ref{ch:conclusie}, tenslotte, wordt de conclusie gegeven en een antwoord geformuleerd op de onderzoeksvragen. Daarbij wordt ook een aanzet gegeven voor toekomstig onderzoek binnen dit domein.
