@@ -67,6 +67,13 @@ Een eenvoudigere, maar in veel toepassingen effectieve aanpak is snapshot-rollba
 
 De besproken technieken tonen dat geen enkele methode universeel de beste keuze is. Volledige back-ups bieden zekerheid, maar zijn traag en duur. Incrementele back-ups zijn efficiënter, maar maken het herstelproces complexer. Snapshot-gebaseerde methoden en journaling zorgen voor snelle hersteltijden, maar vragen extra opslagruimte of leiden tot prestatieverlies. Cloud- en continue back-ups verkorten de tijd tussen back-ups, maar zijn sterk afhankelijk van netwerkbandbreedte.
 
-Uit de literatuur blijkt dat in de praktijk vaak hybride oplossingen worden toegepast: bijvoorbeeld een periodieke volledige back-up gecombineerd met frequente incrementele updates of snapshots  \autocite{McBride2020}. De uitdaging blijft om de juiste balans te vinden tussen betrouwbaarheid, prestaties en opslagverbruik, afhankelijk van de toepassing.
+Uit de literatuur blijkt dat in de praktijk vaak hybride oplossingen worden toegepast: bijvoorbeeld een periodieke volledige back-up gecombineerd met frequente incrementele updates of snapshots \autocite{McBride2020}. De uitdaging blijft om de juiste balans te vinden tussen betrouwbaarheid, prestaties en opslagverbruik, afhankelijk van de toepassing.
 
 Voor modlaunchers en andere consumententoepassingen is vooral gebruiksgemak cruciaal. Een effectief systeem moet snel herstel mogelijk maken zonder dat de gebruiker technische kennis nodig heeft.
+
+\section{\IfLanguageName{dutch}{Bijkomende technieken: bestandscompressie}{Additional techniques: file compression}}%
+\label{sec:bestandscompressie}
+
+Compressie is een techniek die de grootte van opgeslagen data verkleint door redundantie te elimineren. Bij back-upsystemen is dit bijzonder relevant omdat minder opslagruimte vereist is en back-ups sneller over een netwerk kunnen worden overgedragen. Voor back-updoeleinden is uitsluitend verliesloze compressie geschikt, waarbij de originele data exact kan worden gereconstrueerd na decompressie. Bestaande verliesloze algoritmen vertonen echter fundamentele afwegingen: sommige behalen een hoge compressieverhouding, andere blinken uit in codeer- of decodersnelheid, maar geen enkel algoritme presteert consistent het beste op alle vlakken tegelijk \autocite{Rahman2025}.
+
+De keuze van het compressie-algoritme hangt sterk af van de specifieke toepassingsvereisten. Voor een back-upsysteem in een modlauncher waarbij snelheid en eenvoud centraal staan, biedt DEFLATE een bewezen en brede compatibiliteit. Wanneer opslagruimte schaarser is, levert LZMA de beste compressieverhouding. Wanneer een balans tussen beide vereist is en de decompressiesnelheid bij herstel cruciaal is, is Zstandard de meest geschikte keuze op basis van huidig onderzoek \autocite{Matt2025}.

@@ -10,7 +10,7 @@
 \usepackage{lipsum} % For blind text, can be removed after adding actual content
 
 %% Pictures to include in the text can be put in the graphics/ folder
-\graphicspath{{../graphics/}}
+\graphicspath{{figures/}}
 
 %% For source code highlighting, requires pygments to be installed
 %% Compile with the -shell-escape flag!
@@ -42,6 +42,33 @@
 }
 
 % Other packages not already included can be imported here
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\sisetup{
+    group-separator={.},
+    output-decimal-marker={,},
+    per-mode=symbol,
+}
+
 
 %%---------- Document metadata -------------------------------------------------
 \author{Jules Van Nevel}

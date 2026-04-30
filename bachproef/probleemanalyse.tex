@@ -1,2 +1,74 @@
 \chapter{\IfLanguageName{dutch}{Probleemanalyse en dataverzameling}{Problemanalysis and datacollection}}%
 \label{ch:probleemanalyse}
+
+\section{Overzicht van de dataset}
+
+Voor dit onderzoek werden in totaal 47 posts geanalyseerd, afkomstig van Reddit, Steam Community, het officiële KSP-forum en platformen zoals StackExchange en GitHub. Deze posts zijn verspreid over een periode van 12 jaar, wat meteen een eerste belangrijke vaststelling illustreert: de problemen die spelers ondervinden bij het gebruik van modlaunchers zijn niet nieuw, en zijn doorheen de volledige levenscyclus van KSP blijven terugkeren.
+
+\section{Meest voorkomende probleemtypes}
+
+\subsection{Crashes door modconflicten, verouderde mods of ontbrekende afhankelijkheden}
+
+Dit is het meest gerapporteerde probleem in de dataset. Het gaat om crashes tijdens het laden van het spel, bij het openen van een savegame, of willekeurig tijdens gameplay. De oorzaak ligt zelden bij één enkele mod, maar bij de interactie tussen meerdere mods of bij een versie-incompatibiliteit. Voorbeelden hiervan zijn crashes door de mod TweakScale na een CKAN-update en crashes omtrent de B9 Part Switch mod.
+
+Een opvallend patroon is dat gebruikers soms melden dat een herinstallatie van de mod het probleem niet oplost. De reden daarvoor kan liggen aan het feit dat deze problemen veroorzaakt worden door meerdere mods of overlappende configuratiebestanden in de GameData-map, die de nieuwe installatie blijven verstoren. Dit probleem doet zich voor zowel bij manuele installaties als bij installaties via CKAN.
+
+\subsection{Corrupte of verloren savegames}
+
+Een tweede veelvoorkomend probleem betreft beschadigde of onherstelbare savegamebestanden. De oorzaken zijn divers: een stroomonderbreking tijdens het opslaan, een bluescreen door RAM-problemen, een automatische KSP-update terwijl er actieve vluchten in de savegame zaten, of een antivirusprogramma (Avast) dat savebestanden als verdacht beschouwde en verwijderde. In één geval raakte een save beschadigd simpelweg door het laden van het spel na een modwijziging.
+
+Het centrale bestand bij dit probleemtype is persistent.sfs, het primaire savegamebestand van KSP. Wanneer dit bestand corrupt raakt of verdwijnt, is de savegame onbruikbaar. KSP maakt automatisch backups aan in een /saves/<savegame>/Backup-submap en als de gebruiker manueel de game opslaat wordt er een quicksave.sfs gemaakt. Deze zorgen ervoor dat veel savegame corrupties opgelost kunnen worden, maar het probleem is dat de meerderheid van de spelers zich hier niet van bewust zijn dat deze bestanden bestaan.
+
+\subsection{Niet ladende mods}
+
+Een derde categorie omvat gevallen waarbij mods via CKAN geïnstalleerd worden, maar vervolgens niet zichtbaar zijn in het spel. De oorzaak is doorgaans een verkeerde installatielocatie, een dubbele installatie van het spel op dezelfde machine, of ontbrekende afhankelijkheden. Dit probleemtype wordt bijna uitsluitend veroorzaakt door gebruikersfouten en is in de meeste gevallen relatief eenvoudig te verhelpen.
+
+\subsection{Te kort aan geheugen}
+
+Een minder zichtbaar maar terugkerend probleem is het te kort aan werkgeheugen. KSP is een geheugenintensief spel, en zeker bij uitgebreide modpacks kan de geheugengrens snel bereikt worden. Dit manifesteert zich als willekeurige crashes tijdens gameplay of bij het laden, zonder duidelijke foutmelding. Meerdere posts in de dataset vermelden expliciet dat een laptop met 8 GB RAM waarschijnlijk te weinig is, of dat het verwijderen van niet-essentiële mods de stabiliteit verbetert. Doordat de oorzaak niet direct zichtbaar is in de logs, worden deze problemen vaak laat of nooit correct geïdentificeerd.
+
+\section{Oorzaken: gebruikersfout of systeemfout?}
+
+Van de 47 geanalyseerde posts werden 19 posts geclassificeerd als (mede) veroorzaakt door een gebruikersfout. Het gaat daarbij om acties zoals het manueel verwijderen van bestanden uit de GameData-map zonder te controleren welke bestanden cruciaal zijn, het mixen van KSP-versies met incompatibele modversies, het negeren van afhankelijkheden, of het vasthouden aan een verouderde KSP-versie ondanks adviezen om te updaten.
+
+3 posts werden geclassificeerd als een fout van CKAN zelf, waarbij de launcher een update installeerde over bestaande bestanden heen zonder de oude versie eerst te verwijderen.
+
+7 posts vielen onder de categorie "andere oorzaak": hardwarefouten (RAM, stroomuitval), driverproblemen, antivirussoftware, of een verouderde mod buiten de controle van de gebruiker.
+
+De overige posts hadden een onbekende oorzaak, hetzij omdat de oorspronkelijke gebruiker niet terugkeerde om de oplossing te bevestigen, hetzij omdat het probleem nooit werd opgelost.
+
+\section{Aangeboden oplossingen en hun effectiviteit}
+
+\subsection{Meest aangeboden oplossingen}
+
+De meest voorgestelde oplossing over alle probleemtypes heen is een volledige herinstallatie: verwijder alles uit de GameData-map behalve de Squad-mappen, verifieer de spelintegriteit via Steam, en installeer mods opnieuw. Dit is effectief als het probleem wordt veroorzaakt door achtergebleven bestanden, maar het is een destructieve en tijdrovende aanpak die de gebruiker terugzet naar een blanco staat.
+
+Voor savegame-corruptie is de meest effectieve oplossing het herstellen vanuit een backup: hernoem het meest recente backupbestand in /saves/<savegame>/Backup naar persistent.sfs, of hernoem quicksave.sfs door persistent.sfs. Deze aanpak werd in meerdere posts bevestigd als werkend. Het probleem is echter dat gebruikers deze backupmap niet kennen, en dat de backups niet altijd up-to-date zijn op het moment van de crash.
+
+Voor crashproblemen werd ook regelmatig verwezen naar het analyseren van logbestanden (Player.log of KSP.log). Dit is effectief voor het identificeren van de schuldige mod, maar vereist technische kennis die de gemiddelde gebruiker niet heeft. Meerdere helpers in de posts moesten eerst uitleggen waar de logbestanden te vinden zijn.
+
+Een andere veelvoorkomende suggestie is binaire uitsluiting: mods één voor één verwijderen en telkens het spel opnieuw opstarten om te bepalen welke mod het probleem veroorzaakt. Dit werkt, maar is vergt extreem veel tijd bij grote modpacks.
+
+\subsection{Effectiviteit per probleemtype}
+
+Bij crashproblemen door modconflicten zijn oplossingen wisselend effectief. In gevallen waarbij de oorzaak duidelijk geïdentificeerd kon worden (verouderde mod, versie-incompatibiliteit) leidde de gerichte verwijdering of update van die mod tot een oplossing. In gevallen waarbij de oorzaak onduidelijk bleef, bleven gebruikers rondcirkelen met herinstallaties zonder duurzaam resultaat.
+
+Bij savegame-corruptie zijn oplossingen redelijk effectief als er backups beschikbaar zijn. In gevallen zonder backups, door stroomuitval, antivirussoftware of een ontbrekend quicksave-bestand, was het verlies permanent en onherstelbaar.
+
+Bij het probleem van niet-ladende mods waren oplossingen overwegend effectief, omdat de oorzaak doorgaans eenvoudig te identificeren en te verhelpen was.
+
+\section{Jebretary en de nood aan externe tools}
+
+In een bepaalde thread op de KSP-forum werd opgemerkt dat het wenselijk zou zijn om een externe applicatie of editor te hebben die corrupte savebestanden automatisch kan diagnosticeren. Een van de reacties in die thread linkt naar Jebretary, een tool beschikbaar via GitHub, die git gebruikt om wijzigingen in savebestanden bij te houden en elke versie als aparte commit op te slaan.
+
+Jebretary is een interessant vroeg voorbeeld van een back-up- en herstelmechanisme voor KSP-saves. Het maakt het mogelijk om terug te keren naar een eerdere staat van het savebestand, wat savegame-corruptie door crashes of mislukte mod-updates had kunnen voorkomen. Toch kent de tool aanzienlijke beperkingen: ze werd voor het laatst bijgewerkt op 20 augustus 2014, werkt uitsluitend op Windows, en biedt geen oplossing voor bredere problemen zoals incompatibele mods of beschadigde installatiebestanden.
+
+Het bestaan van Jebretary toont aan dat de behoefte aan automatische herstel- en backupmechanismen al vroeg werd gevoeld in de KSP-moddingcommunity. Het feit dat er sindsdien geen volwaardige opvolger is gekomen, en dat gebruikers vandaag de dag nog steeds handmatig persistent.sfs moeten hernoemen of backupmappen moeten doorzoeken, bevestigt dat dit een structureel onopgelost probleem blijft.
+
+\section{Structureel en terugkerend karakter van de problemen}
+
+Een van de meest opvallende conclusies uit de analyse is dat de problemen in de dataset zich uitstrekken over de volledige tijdslijn van KSP, van versie 1.2 en 1.3 tot de meest recente posts uit 2025. Dezelfde probleemtypes komen telkens terug: achtergebleven bestanden na een herinstallatie, savegames die corrupt raken door een crash of een update, crashes door ontbrekende afhankelijkheden. De aangeboden oplossingen zijn ook grotendeels onveranderd gebleven: verwijder GameData, verifieer Steam, herstel vanuit backup.
+
+Dit patroon is kenmerkend voor een structureel probleem: het gaat niet om incidentele fouten van individuele gebruikers, maar om een fundamentele leegte in de betrouwbaarheid van modlaunchers en het spelplatform zelf. Er is geen geïntegreerd herstelmechanisme, er is geen automatische validatie van de installatietoestand, en er is geen gebruiksvriendelijke manier om een beschadigde installatie of savegame te herstellen zonder technische kennis of handmatige tussenkomst.
+
+De bevindingen uit deze communityanalyse onderbouwen daarmee rechtstreeks de probleemstelling van dit onderzoek: het ontbreken van een herstelmechanisme in modlaunchers is geen randgeval, maar een wijdverspreid en structureel probleem dat spelers al sinds het begin van KSP ondervinden.
