@@ -5,14 +5,107 @@
 \chapter{Conclusie}%
 \label{ch:conclusie}
 
-% TODO: Trek een duidelijke conclusie, in de vorm van een antwoord op de
-% onderzoeksvra(a)g(en). Wat was jouw bijdrage aan het onderzoeksdomein en
-% hoe biedt dit meerwaarde aan het vakgebied/doelgroep? 
-% Reflecteer kritisch over het resultaat. In Engelse teksten wordt deze sectie
-% ``Discussion'' genoemd. Had je deze uitkomst verwacht? Zijn er zaken die nog
-% niet duidelijk zijn?
-% Heeft het onderzoek geleid tot nieuwe vragen die uitnodigen tot verder 
-%onderzoek?
+\section{Antwoorden op de onderzoeksvragen}
+\label{sec:concl-deelvragen}
 
-\lipsum[76-80]
+Om tot een gestructureerd antwoord op de hoofdvraag te komen, worden eerst de vijf deelvragen kort beantwoord op basis van wat in de voorgaande hoofdstukken werd onderzocht.
+
+\subsection*{Deelvraag 1 — Welke oplossingen worden vandaag toegepast om kapotte installaties of corrupte savegames te herstellen, en welke beperkingen vertonen ze?}
+
+De analyse van zevenenveertig posts uit de KSP-community leverde een consistent beeld op. De meest voorgestelde oplossing voor crashes en modconflicten is een volledige herinstallatie van de \texttt{GameData}-map: alle mods verwijderen, de spelintegriteit via Steam verifiëren en mods opnieuw installeren. Voor corrupte savegames is de gangbare oplossing het manueel hernoemen van een back-upbestand in \texttt{/saves/<savegame>/Backup} naar \texttt{persistent.sfs}. Beide oplossingen werken in principe, maar hebben aanzienlijke beperkingen. Een herinstallatie is destructief en tijdrovend: alle configuratie en mod-aanpassingen gaan verloren. Het manueel herstellen van een save vereist dat de gebruiker weet dat de back-upmap bestaat, wat in de praktijk zelden het geval blijkt te zijn. Een vroege poging tot een geautomatiseerde oplossing, Jebretary, dateert uit 2014 en werd sindsdien niet meer onderhouden. Het feit dat geen volwaardige opvolger is verschenen en dat gebruikers vandaag nog steeds dezelfde handmatige procedures moeten doorlopen, bevestigt dat dit een structureel onopgelost probleem is.
+
+\subsection*{Deelvraag 2 — Welke vormen van dataverlies en corruptie komen het vaakst voor bij modlaunchers zonder ingebouwd back-up- of rollbackmechanisme?}
+
+Vier categorieën komen naar voren als de meest voorkomende. Crashes door modconflicten, verouderde mods of ontbrekende afhankelijkheden vormen de grootste groep en leiden vaak tot een onbruikbare installatie waarbij zelfs een herinstallatie van de specifieke mod het probleem niet oplost, omdat overlappende configuratiebestanden achterblijven. Beschadigde of verloren savegames vormen de tweede categorie, met als centrale oorzaak een corrupte \texttt{persistent.sfs} door stroomuitval, een crash, een KSP-automatische update tijdens actieve vluchten of een antivirusprogramma dat het bestand verwijdert. De derde categorie betreft mods die geïnstalleerd worden maar niet zichtbaar zijn in het spel, doorgaans door gebruikersfouten zoals een verkeerde installatielocatie. Een vierde, minder zichtbare categorie betreft geheugentekorten die zich manifesteren als willekeurige crashes zonder duidelijke foutmelding.
+
+\subsection*{Deelvraag 3 — Welke technische methoden bestaan er om efficiënte back-up- en rollbacksystemen te implementeren in softwaretoepassingen?}
+
+De technische analyse heeft vier methodes vergeleken op basis van metingen: volledige back-up, incrementele back-up, differentiële back-up en copy-on-write snapshotting via btrfs. Voor elk van deze methodes zijn de eigenschappen op het vlak van snelheid, opslaggebruik, CPU-belasting en geheugengebruik gemeten op realistische werklasten met savegames en mods. Daarnaast werden zeven compressie-algoritmes vergeleken: \texttt{gzip}, \texttt{bzip2}, \texttt{xz}, \texttt{lzma}, \texttt{lzip}, \texttt{lzop} en \texttt{zstd}. De analyse heeft duidelijk gemaakt dat geen enkele methode of algoritme universeel optimaal is, elke keuze brengt een afweging met zich mee tussen back-uptijd, restoretijd, opslagvoetafdruk en systeembelasting.
+
+\subsection*{Deelvraag 4 — Welke aanpak biedt de beste balans tussen opslagruimte, snelheid en computer resourcegebruik voor het back-uppen van grote modinstallaties?}
+
+Voor grote modinstallaties is de snapshotmethode op btrfs technisch het meest aantrekkelijk: het combineert constante back-upkost, quasi-instantane rollbacks en lage fysieke opslagvoetafdruk dankzij blokniveau-deduplicatie. Wanneer btrfs niet beschikbaar is, biedt incrementele tar in combinatie met \texttt{zstd}-compressie de beste afweging. \texttt{zstd} bleek in de metingen op grote werklasten zelfs sneller dan ongecomprimeerde tar, doordat de multithreaded compressie de extra rekentijd ruimschoots compenseert door de verminderde I/O-belasting van een kleiner archief. De vermindering van het opslaggebruik bedraagt voor de geteste modset ongeveer 53 procent ten opzichte van de ongecomprimeerde back-up, terwijl de back-uptijd zelfs licht lager ligt.
+
+\subsection*{Deelvraag 5 — Hoe kan een dergelijk systeem gebruiksvriendelijk en effectief geïmplementeerd worden in een tool?}
+
+Het ontwikkelde prototype demonstreert dat de geformuleerde ontwerprichtlijnen praktisch realiseerbaar zijn in een eenvoudige applicatie. De tool combineert drie functionele kerntaken (back-ups maken, herstellen en beheren) in een interface met drie tabbladen. Gebruiksvriendelijkheidskeuzes betreffen het groeperen van back-uppunten per back-up-actie en daarbinnen per type, een visuele aanduiding van het huidige back-uppunt per item, expliciete bevestigingsdialogen vóór onomkeerbare acties, en asynchrone uitvoering zodat de gebruikersinterface ook tijdens back-ups van meerdere gigabytes responsief blijft. De evaluatie bevestigt dat het prototype deze functionaliteit op realistische werklasten correct uitvoert: een back-up van een KSP-installatie van 20{,}5 GB met 113 mods voltooit in ongeveer 37{,}5 seconden, terwijl een volledige restore in ongeveer 25 seconden afgehandeld wordt.
+
+
+\section{Antwoord op de hoofdvraag}
+\label{sec:concl-hoofdvraag}
+
+De centrale onderzoeksvraag van deze bachelorproef luidde:
+
+\begin{quote}
+    \emph{Hoe kan een robuust en efficiënt back-up- en rollbackmechanisme worden ontworpen voor modlaunchers zoals CKAN, zodat dataverlies en corruptie voorkomen kunnen worden zonder negatieve impact op performantie of gebruiksvriendelijkheid?}
+\end{quote}
+
+Het antwoord dat uit dit onderzoek voortkomt, kan in vier kernpunten worden samengevat.
+
+\paragraph{Een gelaagde methodekeuze afhankelijk van het bestandssysteem.}
+Geen enkele back-upmethode is universeel optimaal. Op bestandssystemen die copy-on-write snapshots ondersteunen (zoals btrfs of zfs) levert de snapshotmethode de beste resultaten op alle geëvalueerde dimensies. Op andere bestandssystemen biedt incrementele tar in combinatie met \texttt{zstd}-compressie de beste afweging tussen snelheid, opslag en betrouwbaarheid. Een robuust systeem detecteert het beschikbare bestandssysteem en kiest automatisch de meest geschikte methode, met de mogelijkheid voor de gebruiker om zelf een keuze op te leggen wanneer beide methodes beschikbaar zijn.
+
+\paragraph{Compressie als integraal onderdeel van het ontwerp.}
+De analyse heeft aangetoond dat een goed gekozen compressie-algoritme de opslagvoetafdruk significant kan verminderen zonder de back-up-prestaties negatief te beïnvloeden. \texttt{zstd} springt hier consistent uit als de meest evenwichtige keuze. Voor gebruikers die de allerkleinste archieven willen, blijft \texttt{xz} een alternatief, indien de hogere geheugenvoetafdruk acceptabel is. Andere algoritmes leveren in de geteste werklasten geen meetbaar voordeel op en zijn voor de doelgroep niet relevant.
+
+\paragraph{Lokaal werken als ontwerpprincipe.}
+Voor de specifieke context van modlaunchers, waarbij de eindgebruiker het spel offline kan spelen en mods uit enkele gigabytes kunnen bestaan, is een lokaal back-upsysteem superieur aan een cloud-gebaseerde oplossing. Het back-upmechanisme moet kunnen opereren zonder netwerkverbinding en mag geen significante vertraging introduceren in de gaming sessies van de gebruiker.
+
+\paragraph{Voorspelbaarheid en zichtbaarheid in de gebruikersinterface.}
+De gebruiksvriendelijkheid van een back-upsysteem hangt niet alleen af van technische snelheid, maar ook van de mate waarin de gebruiker inzicht heeft in wat er gebeurt. Het prototype illustreert dit door de gekozen methode permanent zichtbaar te maken, back-uppunten gegroepeerd per actie weer te geven, het huidige actieve punt visueel te markeren, en bevestigingsdialogen te tonen vóór onomkeerbare acties.
+
+Samen bieden deze vier kernpunten een onderbouwd antwoord op de hoofdvraag: een back-up- en rollbackmechanisme voor modlaunchers combineert een gelaagde methodekeuze met efficiënte compressie, draait lokaal en plaatst voorspelbaarheid centraal in de gebruikersinterface. Het ontwikkelde prototype toont dat deze combinatie technisch realiseerbaar is en in de praktijk op realistische werklasten functioneert.
+
+
+\section{Bijdrage en meerwaarde}
+\label{sec:concl-bijdrage}
+
+De bijdrage van dit onderzoek aan het vakgebied bestaat uit drie delen. Ten eerste levert de probleemanalyse een gestructureerd overzicht van de meest voorkomende vormen van dataverlies en corruptie in de KSP-community, op basis van een dataset die twaalf jaar aan posts overspant. Hieruit blijkt dat het probleem structureel is en wijdverspreid, en dat de gangbare oplossingen beperkt en gebruikersonvriendelijk blijven.
+
+Ten tweede levert de technische analyse een onderbouwde vergelijking van back-upmethodes en compressie-algoritmes binnen de specifieke context van modlauncher-werklasten. Deze vergelijking verschilt van klassieke back-upliteratuur doordat het gericht is op twee zeer verschillende soorten data: kleine, zeer comprimeerbare savegames en grote, reeds deels gecomprimeerde mod-assets. En doordat het de afwegingen evalueert in het licht van een specifieke gebruikssituatie waarin een back-upactie vlak vóór een mod-update plaatsvindt en een rollback in een tijdsdrukscenario gebeurt.
+
+Ten derde resulteren de twee analyses samen in een concrete set van ontwerprichtlijnen die direct toepasbaar zijn bij het ontwikkelen of uitbreiden van een modlauncher. Het prototype demonstreert dat deze richtlijnen ook praktisch realiseerbaar zijn en bewijst dat een gebruiksvriendelijk back-upsysteem voor modlaunchers vandaag al mogelijk is met bestaande tools.
+
+Voor de doelgroep, de KSP-community in het bijzonder en modlauncher-gebruikers in het algemeen, biedt dit onderzoek de basis voor een concrete oplossing voor een probleem dat al meer dan een decennium structureel onopgelost is gebleven. De hoop is dat de ontwerprichtlijnen en het prototype een aanzet kunnen vormen voor een productiekwaliteit-implementatie, idealiter geïntegreerd in een bestaande modlauncher zoals CKAN.
+
+
+\section{Kritische reflectie}
+\label{sec:concl-reflectie}
+
+Een aantal observaties tijdens dit onderzoek verdienen kritische reflectie, omdat ze niet vanzelfsprekend waren of de eerste verwachtingen gedeeltelijk hebben bijgesteld.
+
+\paragraph{De goede prestaties van \texttt{zstd}.}
+Bij aanvang van het onderzoek werd verwacht dat compressie steeds een afweging zou opleveren tussen back-uptijd en archiefgrootte, een snellere compressie betekent doorgaans een groter archief. \texttt{zstd} bleek deze afweging echter grotendeels te omzeilen op grote werklasten: in de metingen op de moddataset comprimeerde \texttt{zstd} zelfs sneller dan een ongecomprimeerde \texttt{tar}, doordat de multithreaded compressie de extra rekentijd compenseerde door de verminderde I/O-belasting van een kleiner archief. Dit was geen verwacht resultaat en heeft de aanbevelingen op dit punt sterker gemaakt dan oorspronkelijk geanticipeerd: \texttt{zstd} hoeft niet als compromis tussen snelheid en compressie te worden gepresenteerd, maar als een methode die in beide dimensies wint.
+
+\paragraph{Mods comprimeren slechter dan savegames.}
+Een tweede onverwachte vaststelling betrof de meer beperkte compressiewinst op de moddataset. Waar savegames met een ratio van ongeveer 0{,}07 gecomprimeerd konden worden, bleven alle algoritmes op de mods steken rond een ratio van 0{,}37 tot 0{,}54. De oorzaak ligt in het feit dat moderne mods grotendeels uit reeds gecomprimeerde assets bestaan: texturen, audio, modellen. Hoewel deze observatie technisch evident is achteraf, was het vooraf niet expliciet vermeld in de literatuur die werd geraadpleegd. De implicatie is praktisch relevant: voor mods levert een agressief algoritme zoals \texttt{xz} of \texttt{lzip} weinig extra winst op ten opzichte van een snel algoritme zoals \texttt{zstd}, terwijl de tijdkost sterk toeneemt.
+
+\paragraph{Differentieel werd volledig gedomineerd door incrementeel.}
+In de back-upliteratuur worden differentiële en incrementele back-ups vaak naast elkaar gepresenteerd als twee gelijkwaardige alternatieven met elk hun eigen voordelen. De empirische metingen in dit onderzoek nuanceren dat beeld: voor de geteste werklasten biedt differentieel geen meetbaar voordeel ten opzichte van incrementeel. De back-uptijd is hoger, het opslaggebruik is groter, en de restoretijd is nauwelijks beter. De theoretische voordelen van differentieel, een eenvoudigere restore omdat slechts twee archieven nodig zijn, wegen in de praktijk niet op tegen de nadelen. Voor het ontwerp van een back-upsysteem voor modlaunchers betekent dit dat de keuze tussen beide methodes minder open ligt dan eerder verwacht.
+
+\paragraph{De keuze om btrfs-snapshotting niet in de finale tool op te nemen.}
+Hoewel de technische analyse btrfs-snapshotting aanbeveelt als primaire methode op ondersteunde bestandssystemen, werd deze methode in de finale versie van het prototype niet meegenomen. De reden ligt niet bij de techniek zelf maar bij de doelgroep: het percentage computergebruikers dat een btrfs-bestandssysteem gebruikt is bijzonder laag, waardoor de praktische relevantie van deze methode voor de gemiddelde KSP-speler beperkt is. Deze afweging illustreert een breder principe: een ontwerprichtlijn die technisch optimaal is, hoeft niet automatisch de beste keuze te zijn voor de daadwerkelijke implementatie wanneer de doelgroep in de praktijk anders is samengesteld dan de technische analyse veronderstelt.
+
+
+\section{Vragen voor verder onderzoek}
+\label{sec:concl-verder-onderzoek}
+
+Het onderzoek heeft een aantal vragen opgeworpen die buiten de scope van deze bachelorproef vielen, maar die uitnodigen tot verder werk.
+
+\paragraph{Hoe goed schaalt het systeem bij langdurig gebruik?}
+Het prototype voorziet geen automatisch retentiebeleid. Bij langdurig gebruik kan de hoeveelheid back-uppunten en de bijhorende opslagvoetafdruk oplopen. Een onderzoek naar geautomatiseerde consolidatiestrategieën, bijvoorbeeld het periodiek samenvoegen van een keten incrementen tot een nieuwe basis-back-up, zou een waardevolle aanvulling vormen.
+
+\paragraph{Hoe goed werkt snapshotting in praktijk bij niet-subvolume mappen?}
+Hoewel btrfs-snapshotting niet in de finale tool werd opgenomen, blijft het technisch een interessante optie voor gebruikers die hun KSP-installatie wel op btrfs hebben staan. Een verdere exploratie zou kunnen onderzoeken hoe een tool de gebruiker kan begeleiden bij het omzetten van een bestaande KSP-folder naar een volwaardige subvolume, zonder dat dit voor de eindgebruiker als ingrijpend overkomt. Een vergelijkbare vraag stelt zich voor zfs.
+
+\paragraph{Hoe ziet integratie in CKAN er concreet uit?}
+Het ultieme doel van een back-upsysteem voor KSP-modding is een naadloze integratie in de bestaande modlauncher. CKAN is geschreven in C\#, wat een herschrijving of port van het back-upmechanisme zou vereisen. Een vervolgonderzoek zou kunnen vaststellen welke architecturale aanpassingen aan CKAN noodzakelijk zijn om een back-uphook in te bouwen, en welke onderdelen van de hier ontwikkelde Python-implementatie rechtstreeks vertaalbaar zijn.
+
+\paragraph{Hoe generaliseren de bevindingen naar andere games?}
+KSP is een specifieke casus, maar de problemen die in de probleemanalyse werden geïdentificeerd zijn niet exclusief voor KSP. Modlaunchers bestaan ook voor games zoals Minecraft, Skyrim, Fallout en vele andere. Een vergelijkende studie zou kunnen vaststellen in welke mate de hier voorgestelde ontwerprichtlijnen overdraagbaar zijn naar andere mod-ecosystemen, en waar context-specifieke aanpassingen noodzakelijk blijven.
+
+\bigskip
+
+Het onderzoek heeft daarmee niet alleen een antwoord geformuleerd op de oorspronkelijke onderzoeksvraag, maar ook nieuwe richtingen geopend voor toekomstig werk. Dat een meer dan tien jaar oud probleem in een actieve gamingcommunity vandaag nog steeds structureel onopgelost is, suggereert dat zowel de onderzoeksvragen als de ontwerprichtlijnen die in deze bachelorproef zijn geformuleerd, ook na deze proef relevant zullen blijven.
+
 
