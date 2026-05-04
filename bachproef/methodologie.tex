@@ -15,7 +15,7 @@ De verzamelde informatie wordt vervolgens geclassificeerd volgens het type fout,
 \section{\IfLanguageName{dutch}{Fase 2: Technische analyse}{Fase 2: Technical analysis}}%
 \label{sec:fase2-technischeanalyse}
 
-Na de probleemanalyse volgt een technische analyse van bestaande back-up- en rollbacktechnieken. Het doel van deze fase is om op basis van metingen te bepalen welke methodes en compressie-algoritmes het meest geschikt zijn voor de werklast van een modlauncher. De benchmarks worden uitgevoerd op realistische datasets: enerzijds zes opeenvolgende savegames die meerdere savepoints doorheen de tijd simuleren, anderzijds drie grote modinstallaties van enkele gigabytes die mod-updates representeren.
+Na de probleemanalyse volgt een technische analyse van bestaande back-up- en rollbacktechnieken. Het doel van deze fase is om op basis van metingen te bepalen welke methodes en compressie-algoritmes het meest geschikt zijn voor de werklast van een modlauncher.
 
 Vier back-up-methodes worden vergeleken: een volledige back-up, een incrementele back-up, een differentiële back-up en een copy-on-write snapshot via btrfs. Voor de eerste drie methodes wordt ook de invloed van zeven compressie-algoritmes gemeten: \texttt{gzip}, \texttt{bzip2}, \texttt{xz}, \texttt{lzma}, \texttt{lzip}, \texttt{lzop} en \texttt{zstd}.
 

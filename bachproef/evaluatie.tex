@@ -8,7 +8,7 @@ Dit hoofdstuk evalueert het prototype dat is ontwikkeld op basis van de ontwerpr
 
 \subsection{Afbakening en motivering van de scope}
 
-De tool die in dit hoofdstuk wordt geëvalueerd, ondersteunt op dit moment één back-up-methode: incrementele tar+zstd. Btrfs-snapshotting werd in een tussentijdse versie van het prototype weggelaten uit de finale tool. De doorslaggevende reden is: het aandeel computergebruikers dat een btrfs-bestandssysteem gebruikt is bijzonder laag, waardoor de relevantie van deze methode voor de doelgroep (KSP-spelers in het algemeen) beperkt blijft. Btrfs-ondersteuning wordt om die reden beschouwd als een uitbreiding voor toekomstig werk, detectie voor het type bestandssysteem is wel al geïmplementeerd. Sectie~\ref{sec:eval-conformiteit} gaat hier dieper op in bij de bespreking van de eerste ontwerprichtlijn.
+De tool die in dit hoofdstuk wordt geëvalueerd, ondersteunt op dit moment één back-up-methode: incrementele tar+zstd. Btrfs-snapshotting werd in het finale prototype weggelaten. De doorslaggevende reden is: het aandeel computergebruikers dat een btrfs-bestandssysteem gebruikt is bijzonder laag, waardoor de relevantie van deze methode voor de doelgroep (KSP-spelers in het algemeen) beperkt blijft. Btrfs-ondersteuning wordt om die reden beschouwd als een uitbreiding voor toekomstig werk, detectie voor het type bestandssysteem is wel al geïmplementeerd. Sectie~\ref{sec:eval-conformiteit} gaat hier dieper op in bij de bespreking van de eerste ontwerprichtlijn.
 
 Een tweede afbakening betreft de evaluatiemethodologie. De UX-evaluatie in sectie~\ref{sec:eval-heuristiek} steunt op een heuristische analyse volgens de tien usability-principes van Nielsen, uitgevoerd door de ontwikkelaar zelf op basis van praktisch gebruik van het prototype op een werkelijke KSP-installatie met meer dan 100 mods en verschillende savegames.
 
@@ -18,8 +18,8 @@ Een tweede afbakening betreft de evaluatiemethodologie. De UX-evaluatie in secti
 Voor de implementatie van het prototype werd Python gekozen. Deze keuze verdient toelichting, omdat CKAN (de bestaande modlauncher voor KSP) in C\# is geschreven. Vier overwegingen lagen aan de basis van de keuze voor Python in deze fase:
 
 \begin{itemize}
-    \item \textbf{Aard van de werklast.} De kernoperaties van de tool (\texttt{btrfs subvolume snapshot}, \texttt{tar}, \texttt{zstd}, \texttt{rsync}, \texttt{findmnt}) zijn allemaal externe binaries die via shell-commando's worden aangeroepen. De programmeertaal speelt hier geen rol in de prestaties; alle rekenintensieve werk gebeurt in de aangeroepen tools. Pythons \texttt{subprocess}-module biedt de meest directe en leesbare integratie voor dit soort patronen op Linux.
-    \item \textbf{Snelheid van ontwikkeling.} Voor een proof of concept weegt ontwikkelsnelheid zwaarder dan distributiegemak. Pythons rijke standaardbibliotheek (\texttt{json}, \texttt{pathlib}, \texttt{dataclasses}, \texttt{subprocess}) en de mature PySide6-binding voor Qt laten toe om in een beperkt tijdsbestek tot een werkende GUI te komen.
+    \item \textbf{Aard van de werklast.} De kernoperaties van de tool (\texttt{btrfs subvolume snapshot}, \texttt{tar}, \texttt{zstd}, \texttt{rsync}, \texttt{findmnt}) zijn allemaal externe binaries die via shell-commando's worden aangeroepen. De programmeertaal speelt hier geen rol in de prestaties, alle rekenintensieve werk gebeurt in de aangeroepen tools. Pythons \texttt{subprocess}-module biedt de meest directe en leesbare integratie voor dit soort patronen op Linux.
+    \item \textbf{Snelheid van ontwikkeling.} Voor een proof of concept weegt ontwikkelsnelheid zwaarder dan distributiegemak. Pythons rijke standaardbibliotheek (\texttt{json}, \texttt{pathlib}, \texttt{dataclasses}, \texttt{subprocess}) en PySide6 voor Qt laten toe om in een beperkte tijd tot een werkende GUI te komen.
     \item \textbf{Distributievereisten zijn beperkt voor een PoC.} Het belangrijkste voordeel dat C\# zou bieden, een single- binary distributie via .NET, is voor een prototype dat op één testsysteem moet draaien geen doorslaggevend criterium.
     \item \textbf{CKAN-integratie als toekomstig werk.} Een rechtstreekse integratie van het back-upsysteem in CKAN is het ultieme einddoel van dit type tool, maar valt buiten de scope van dit prototype. Wanneer die integratie in de toekomst wordt ondernomen, is een C\#-implementatie de natuurlijke keuze. Voor de huidige fase, waarin de focus ligt op het valideren van de ontwerprichtlijnen via een werkende standalone tool, biedt Python de beste route.
 \end{itemize}
@@ -39,7 +39,7 @@ De combinatie van Python met PySide6 (Qt for Python) levert een moderne dark-the
 
 Om de functionele correctheid van het prototype systematisch te beoordelen, werd een testmatrix opgesteld die elk afzonderlijk aspect van de tool valideert. De testen zijn gegroepeerd in vier clusters: basis back-up en restore, selectie en interface, configuratie en metadata, en edge cases met foutafhandeling. Elk testgeval beschrijft een doel, een uitgevoerde stap en een verwacht resultaat, waarna het werkelijke gedrag wordt gerapporteerd.
 
-\subsection{Cluster 1 — Basis back-up en restore}
+\subsection{Cluster 1: Basis back-up en restore}
 
 Tabel~\ref{tab:eval-cluster1} toont de testen van de kernfunctionaliteiten. Deze testen werden uitgevoerd op een werkelijke KSP-installatie met 113 mods die 20{,}5~GB omvatten. Eén van de testen (volledige back-up van de mod-set) leverde meteen ook een nuttige indicatieve meting op: de back-up van alle 113 mods (level~0) duurde ongeveer 37{,}5~seconden en resulteerde in een gecomprimeerd archief van 10{,}3~GB. Een volledige restore van die set duurde ongeveer 25~ seconden. Deze cijfers fungeren in dit hoofdstuk niet als benchmark, maar als bewijs dat het prototype daadwerkelijk werkt op realistische werklasten zonder de UI te bevriezen.
 
@@ -68,11 +68,11 @@ Figuur~\ref{fig:eval-backup-progress} toont het back-up-scherm tijdens een volle
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.95\linewidth]{backup_scherm_tijdens_backup.png}
-    \caption{Back-up-scherm tijdens uitvoering. De progressbar toont de voortgang en de log onderaan rapporteert per item de status en grootte. De gebruikersinterface blijft responsief tijdens de hele operatie.}
+    \caption{Back-up-scherm tijdens uitvoering. De progressbar toont dat de operaties nog bezig zijn en de log onderaan rapporteert per item de status en grootte. De gebruikersinterface blijft responsief tijdens de hele operatie.}
     \label{fig:eval-backup-progress}
 \end{figure}
 
-\subsection{Cluster 2 — Selectie en interface}
+\subsection{Cluster 2: Selectie en interface}
 
 Tabel~\ref{tab:eval-cluster2} verzamelt de testen rond gebruikersinteractie en visuele weergave.
 
@@ -110,7 +110,7 @@ Figuur~\ref{fig:eval-backup-screen} illustreert het selectiescherm na voltooiing
     \label{fig:eval-restore-after}
 \end{figure}
 
-\subsection{Cluster 3 — Configuratie en metadata}
+\subsection{Cluster 3: Configuratie en metadata}
 
 Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata. De testen in dit cluster tonen aan dat de scheiding tussen globale en per-installatie state correct werkt. De globale configuratie in \texttt{\textasciitilde/.config/ksp-backup/installations.json} beperkt zich bewust tot een lijst van paden naar bekende installaties. Alle eigenlijke back-upmetadata staat in de \texttt{metadata.json} binnen elke KSP-installatie zelf.
 
@@ -132,7 +132,7 @@ Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata.
     \end{tabular}
 \end{table}
 
-\subsection{Cluster 4 — Edge cases en foutafhandeling}
+\subsection{Cluster 4: Edge cases en foutafhandeling}
 
 \begin{table}[h]
     \centering
@@ -188,10 +188,10 @@ In het vorige hoofdstuk werden elf ontwerprichtlijnen geformuleerd op basis van 
     \end{tabular}
 \end{table}
 
-\paragraph{Richtlijn 1 — Snapshotting als uitbreiding.}
+\paragraph{Richtlijn 1: Snapshotting als uitbreiding.}
 De technische analyse heeft btrfs-snapshotting aangeduid als de primaire methode voor opstellingen die het ondersteunen. In de finale tool werd deze methode echter weggelaten. Het percentage computergebruikers dat een btrfs-bestandssysteem gebruikt is bijzonder laag, en de typische KSP-speler bevindt zich op Windows met NTFS of op een Linux-systeem met ext4. Snapshotting heeft daardoor een beperkte praktische relevantie voor de doelgroep, ondanks de gunstige technische eigenschappen. Btrfs-snapshotting wordt om die reden behandeld als een uitbreiding in plaats van een kernvereiste. Het prototype valt voor alle bestandssystemen terug op de tweede aanbeveling uit de analyse: incrementele tar+zstd.
 
-\paragraph{Richtlijn 6 — \texttt{xz} als uitbreiding.}
+\paragraph{Richtlijn 6: \texttt{xz} als uitbreiding.}
 De tool gebruikt momenteel uitsluitend \texttt{zstd} als compressie-algoritme, conform richtlijn~5. Een optionele variant met \texttt{xz} voor gebruikers die maximale opslagbesparing wensen werd nog niet geïmplementeerd. Het toevoegen van een tweede algoritme-keuze in de configuratie-tab is technisch eenvoudig en wordt beschouwd als een gepaste uitbreiding.
 
 
@@ -201,16 +201,16 @@ De tool gebruikt momenteel uitsluitend \texttt{zstd} als compressie-algoritme, c
 De bruikbaarheid van de UI werd beoordeeld via een heuristische evaluatie volgens de tien principes van Nielsen. Per principe wordt kort vermeld hoe het prototype ermee omgaat, met een lichte status (sterk, voldoende of aandachtspunt).
 
 \begin{description}
-    \item[Zichtbaarheid van systeemstatus — \emph{sterk}.] De progressbar en live log tijdens een back-up of restore tonen duidelijk welke operatie aan de gang is. De groene cirkel naast het huidige back-uppunt informeert over de actieve toestand. De gekozen back-upmethode wordt rechtsbovenin de back-up-tab permanent zichtbaar gehouden.
-    \item[Match met de echte wereld — \emph{sterk}.] Begrippen als ``back-up maken'', ``herstellen'' en ``installatie toevoegen'' sluiten aan bij gangbaar taalgebruik van eindgebruikers. Technische termen zoals \texttt{btrfs} of \texttt{snar} blijven achter de schermen.
-    \item[Gebruikerscontrole en vrijheid — \emph{voldoende}.] Bevestigingsdialogen vóór restore en delete voorkomen accidentele onomkeerbare acties. Een ``ongedaan maken''-functie ontbreekt: eens een restore is uitgevoerd, kan de gebruiker enkel terugvallen op een ander back-uppunt.
-    \item[Consistentie en standaarden — \emph{sterk}.] De Qt/KDE- look-and-feel zorgt voor herkenbaar gedrag van knoppen, dialogen en lijsten. Acties die data wijzigen krijgen consistent een blauwe (primaire) of rode (gevaarlijke) accentkleur.
-    \item[Foutpreventie — \emph{sterk}.] Stock-content wordt automatisch uitgesloten van de mod-lijst, waardoor de gebruiker geen onnodige back-ups kan maken van data die niet vervangen mag worden. De cascade-waarschuwing bij het verwijderen van een level 0 (figuur~\ref{fig:eval-delete-dialog}) toont expliciet de afhankelijkheden vóór bevestiging.
-    \item[Herkennen in plaats van onthouden — \emph{voldoende}.] Back-uppunten zijn gegroepeerd per back-up-actie en daarbinnen per type. De gebruiker hoeft geen IDs of timestamps te onthouden; het visueel herkennen van een set en het aanvinken van items volstaat. De mogelijkheid om een naam te geven aan een back-up ontbreekt nog.
-    \item[Flexibiliteit en efficiëntie — \emph{voldoende}.] Knoppen voor ``alles selecteren'' en ``niets selecteren'' versnellen bulk-operaties. De boomstructuur kan in zijn geheel uitgevouwen of opgevouwen worden. Sneltoetsen voor frequente acties ontbreken.
-    \item[Esthetisch en minimalistisch ontwerp — \emph{sterk}.] De UI bestaat uit drie tabs zonder overbodige elementen. Hint-teksten verschijnen enkel waar de gebruiker context nodig heeft.
-    \item[Foutdiagnose — \emph{voldoende}.] Foutmeldingen verschijnen in de log onderaan en in een dialoog. Voor een PoC is dit voldoende, maar uitgebreidere foutclassificatie (bijvoorbeeld onderscheid tussen ``schijf vol'' en ``rechten ontbreken'') zou de gebruiksvriendelijkheid in productie verhogen.
-    \item[Hulp en documentatie — \emph{aandachtspunt}.] De tool bevat enkel inline hint-labels per tab. Een aparte help-pagina, tooltip-uitleg op individuele velden of een korte introductie-tour ontbreekt. Voor een PoC is de tool eenvoudig genoeg om dit te aanvaarden, maar voor productiekwaliteit is documentatie een nodige toevoeging.
+    \item[Zichtbaarheid van systeemstatus: sterk.] De progressbar en live log tijdens een back-up of restore tonen duidelijk welke operatie aan de gang is. De groene cirkel naast het huidige back-uppunt informeert over de actieve toestand. De gekozen back-upmethode wordt rechtsbovenin de back-up-tab permanent zichtbaar gehouden.
+    \item[Match met de echte wereld: sterk.] Begrippen als ``back-up maken'', ``herstellen'' en ``installatie toevoegen'' sluiten aan bij gangbaar taalgebruik van eindgebruikers. Technische termen zoals \texttt{btrfs} of \texttt{snar} blijven achter de schermen.
+    \item[Gebruikerscontrole en vrijheid: voldoende.] Bevestigingsdialogen vóór restore en delete voorkomen accidentele onomkeerbare acties. Een ``ongedaan maken''-functie ontbreekt: eens een restore is uitgevoerd, kan de gebruiker enkel terugvallen op een ander back-uppunt.
+    \item[Consistentie en standaarden: sterk.] De Qt/KDE- look-and-feel zorgt voor herkenbaar gedrag van knoppen, dialogen en lijsten. Acties die data wijzigen krijgen consistent een blauwe (primaire) of rode (gevaarlijke) accentkleur.
+    \item[Foutpreventie: sterk.] Stock-content wordt automatisch uitgesloten van de mod-lijst, waardoor de gebruiker geen onnodige back-ups kan maken van data die niet vervangen mag worden. De cascade-waarschuwing bij het verwijderen van een level 0 (figuur~\ref{fig:eval-delete-dialog}) toont expliciet de afhankelijkheden vóór bevestiging.
+    \item[Herkennen in plaats van onthouden: voldoende.] Back-uppunten zijn gegroepeerd per back-up-actie en daarbinnen per type. De gebruiker hoeft geen IDs of timestamps te onthouden, het visueel herkennen van een set en het aanvinken van items volstaat. De mogelijkheid om een naam te geven aan een back-up ontbreekt nog.
+    \item[Flexibiliteit en efficiëntie: voldoende.] Knoppen voor ``alles selecteren'' en ``niets selecteren'' versnellen bulk-operaties. De boomstructuur kan in zijn geheel uitgevouwen of opgevouwen worden. Sneltoetsen voor frequente acties ontbreken.
+    \item[Esthetisch en minimalistisch ontwerp — sterk.] De UI bestaat uit drie tabs zonder overbodige elementen. Hint-teksten verschijnen enkel waar de gebruiker context nodig heeft.
+    \item[Foutdiagnose: voldoende.] Foutmeldingen verschijnen in de log onderaan en in een dialoog. Voor een PoC is dit voldoende, maar uitgebreidere foutclassificatie (bijvoorbeeld onderscheid tussen ``schijf vol'' en ``rechten ontbreken'') zou de gebruiksvriendelijkheid in productie verhogen.
+    \item[Hulp en documentatie: aandachtspunt.] De tool bevat enkel hint-labels per tab. Een aparte help-pagina, tooltip-uitleg op individuele velden of een korte introductie-tour ontbreekt. Voor een PoC is de tool eenvoudig genoeg om dit te aanvaarden, maar voor productiekwaliteit is documentatie een nodige toevoeging.
 \end{description}
 
 Een heuristische evaluatie door de ontwikkelaar zelf vangt blinde vlekken niet op die echte gebruikers wel zouden ontdekken. Deze sectie biedt daarom een gestructureerde reflectie op de UI-kwaliteit, geen gevalideerde usability-meting. Voor een productieversie zou gebruikersonderzoek met effectieve KSP-spelers een logische volgende stap zijn.
