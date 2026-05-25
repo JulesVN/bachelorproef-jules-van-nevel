@@ -45,7 +45,6 @@ Tabel~\ref{tab:eval-cluster1} toont de testen van de kernfunctionaliteiten. Deze
 
 \begin{table}[h]
     \centering
-    \label{tab:eval-cluster1}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
         \toprule
@@ -61,9 +60,31 @@ Tabel~\ref{tab:eval-cluster1} toont de testen van de kernfunctionaliteiten. Deze
         \bottomrule
     \end{tabular}
     \caption{Cluster 1: basis back-up en restore.}
+    \label{tab:eval-cluster1}
 \end{table}
 
 Figuur~\ref{fig:eval-backup-progress} toont het back-up-scherm tijdens een volledige back-up van de 113 mods. De vooruitgangsbalk en de live log onderaan houden de gebruiker geïnformeerd zonder dat de UI bevriest. De aangeroepen \texttt{tar}-processen draaien op een achtergrondthread via Qt's \texttt{QThread}-mechanisme.
+
+\begin{listing}[h]
+\begin{minted}{python}
+result = subprocess.run(
+    [
+        "tar",
+        "--zstd",
+        f"--listed-incremental={snar}",
+        "-cf", str(archive),
+        "-C", str(source.parent),
+        source.name,
+    ],
+    capture_output=True, text=True,
+)
+if result.returncode != 0:
+    archive.unlink(missing_ok=True)
+    raise RuntimeError(f"tar faalde: {result.stderr.strip()}")
+\end{minted}
+\caption{Back-upoproep in \texttt{backup.py}: de \texttt{tar}-opdracht met \texttt{--listed-incremental} en \texttt{--zstd} wordt via \texttt{subprocess.run} aangeroepen. Het snar-bestand bepaalt welke bestanden als gewijzigd worden beschouwd, bij een terugkerende foutcode wordt het onvolledig archief onmiddellijk verwijderd.}
+\label{lst:poc-backup-call}
+\end{listing}
 
 \begin{figure}[h]
     \centering
@@ -78,7 +99,6 @@ Tabel~\ref{tab:eval-cluster2} verzamelt de testen rond gebruikersinteractie en v
 
 \begin{table}[h]
     \centering
-    \label{tab:eval-cluster2}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
         \toprule
@@ -92,6 +112,7 @@ Tabel~\ref{tab:eval-cluster2} verzamelt de testen rond gebruikersinteractie en v
         \bottomrule
     \end{tabular}
     \caption{Cluster 2: selectie en interface.}
+    \label{tab:eval-cluster2}
 \end{table}
 
 Figuur~\ref{fig:eval-backup-screen} illustreert het selectiescherm na voltooiing van een back-up van alle 113 mods. De saves- en mods-kolommen tonen aanvinkbare lijsten, stock-mappen zoals \texttt{Squad} ontbreken. Figuur~\ref{fig:eval-restore-after} toont de restore-tab na een herstel van een save naar level 2: de groene cirkel naast het zonet herstelde punt geeft duidelijk aan welk punt op dit moment actief is in de werkmap.
@@ -114,10 +135,34 @@ Figuur~\ref{fig:eval-backup-screen} illustreert het selectiescherm na voltooiing
 
 Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata. De testen in dit cluster tonen aan dat de scheiding tussen globale en per-installatie state correct werkt. De globale configuratie in \texttt{\textasciitilde/.config/ksp-backup/installations.json} beperkt zich bewust tot een lijst van paden naar bekende installaties. Alle eigenlijke back-upmetadata staat in de \texttt{metadata.json} binnen elke KSP-installatie zelf.
 
+\begin{listing}[h]
+\begin{minted}{json}
+{
+  "method": "tar_zstd_incremental",
+  "backups": [
+    {
+      "id": "2025-05-21_14-30-00_a1b2c3",
+      "set_id": "set_2025-05-21_14-30-00_d4e5f6",
+      "timestamp": "2025-05-21T14:30:00",
+      "kind": "mod",
+      "item_name": "RealSolarSystem",
+      "method": "tar_zstd_incremental",
+      "location": "/KSP/Backups/archives/...L0.tar.zst",
+      "size_bytes": 1073741824,
+      "increment_level": 0
+    }
+  ],
+  "current_pointers": {
+    "mod::RealSolarSystem": "2025-05-21_14-30-00_a1b2c3"
+  }
+}
+\end{minted}
+\caption{Fragment van \texttt{metadata.json}: één back-uppunt van de mod \texttt{RealSolarSystem} op level~0. Het veld \texttt{current\_pointers} geeft per item aan welk back-uppunt momenteel de actieve toestand weergeeft in de KSP-installatie.}
+\label{lst:metadata-json}
+\end{listing}
 
 \begin{table}[h]
     \centering
-    \label{tab:eval-cluster3}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
         \toprule
@@ -130,13 +175,13 @@ Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata.
         \bottomrule
     \end{tabular}
     \caption{Cluster 3: configuratie en metadata.}
+    \label{tab:eval-cluster3}
 \end{table}
 
 \subsection{Cluster 4: Edge cases en foutafhandeling}
 
 \begin{table}[h]
     \centering
-    \label{tab:eval-cluster4}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
         \toprule
@@ -149,9 +194,27 @@ Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata.
         \bottomrule
     \end{tabular}
     \caption{Cluster 4: edge cases en foutafhandeling.}
+    \label{tab:eval-cluster4}
 \end{table}
 
-Tabel~\ref{tab:eval-cluster4} toont de testen van de edge cases en foutafhandeling. Bij het opzetten van deze testmatrix kwam tijdens de ontwikkeling een bug aan het licht: bij het verwijderen van een level-0-basisarchief werd het snar-bestand niet mee opgeruimd, waardoor de eerstvolgende back-up van datzelfde item als level 1 werd aangemaakt op basis van een verouderd snar-bestand. De fout werd verholpen door bij elke verwijdering te controleren of er nog een level-0-archief overblijft voor het betreffende item, en zo niet, het snar-bestand én alle verweesde incrementen mee op te ruimen. Figuur~\ref{fig:eval-delete-dialog} toont de bevestigingsdialoog die de gebruiker informeert over dit scenario.
+Tabel~\ref{tab:eval-cluster4} toont de testen van de edge cases en foutafhandeling. Bij het opzetten van deze testmatrix kwam tijdens de ontwikkeling een bug aan het licht: bij het verwijderen van een level-0-basisarchief werd het snar-bestand niet mee opgeruimd, waardoor de eerstvolgende back-up van datzelfde item als level 1 werd aangemaakt op basis van een verouderd snar-bestand. De fout werd verholpen door bij elke verwijdering te controleren of er nog een level-0-archief overblijft voor het betreffende item, en zo niet, het snar-bestand én alle verweesde incrementen mee op te ruimen.
+
+\begin{listing}[h]
+\begin{minted}{python}
+has_level_0 = any(
+    b.increment_level == 0 for b in remaining_for_item
+)
+if not has_level_0:
+    reset_snar_files(installation, entry.kind, entry.item_name)
+    for orphan in remaining_for_item:
+        Path(orphan.location).unlink(missing_ok=True)
+        _remove_backup(installation, orphan.id)
+\end{minted}
+\caption{Cascade-cleanup in \texttt{delete\_backup} (\texttt{backup.py}): als na het verwijderen geen level-0-archief meer overblijft voor het betrokken item, worden het snar-bestand en alle verweesde incrementen automatisch mee opgeruimd.}
+\label{lst:cascade-cleanup}
+\end{listing}
+
+Figuur~\ref{fig:eval-delete-dialog} toont de bevestigingsdialoog die de gebruiker informeert over dit scenario.
 
 \begin{figure}[h]
     \centering
@@ -167,7 +230,6 @@ In het vorige hoofdstuk werden elf ontwerprichtlijnen geformuleerd op basis van 
 
 \begin{table}[h]
     \centering
-    \label{tab:eval-conformiteit}
     \small
     \begin{tabular}{p{0.04\linewidth}p{0.40\linewidth}p{0.18\linewidth}p{0.25\linewidth}}
         \toprule
@@ -186,6 +248,7 @@ In het vorige hoofdstuk werden elf ontwerprichtlijnen geformuleerd op basis van 
         \bottomrule
     \end{tabular}
     \caption{Conformiteit van het prototype met de ontwerprichtlijnen.}
+    \label{tab:eval-conformiteit}
 \end{table}
 
 \paragraph{Richtlijn 1: Snapshotting als uitbreiding.}

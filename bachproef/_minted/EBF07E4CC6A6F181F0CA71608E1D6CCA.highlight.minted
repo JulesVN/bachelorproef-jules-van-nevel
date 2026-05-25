@@ -1,0 +1,16 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{n}{result} \PYG{o}{=} \PYG{n}{subprocess}\PYG{o}{.}\PYG{n}{run}\PYG{p}{(}
+    \PYG{p}{[}
+        \PYG{l+s+s2}{\PYGZdq{}tar\PYGZdq{}}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}\PYGZhy{}\PYGZhy{}zstd\PYGZdq{}}\PYG{p}{,}
+        \PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}\PYGZhy{}\PYGZhy{}listed\PYGZhy{}incremental=}\PYG{l+s+si}{\PYGZob{}}\PYG{n}{snar}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{,}
+        \PYG{l+s+s2}{\PYGZdq{}\PYGZhy{}cf\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{archive}\PYG{p}{),}
+        \PYG{l+s+s2}{\PYGZdq{}\PYGZhy{}C\PYGZdq{}}\PYG{p}{,} \PYG{n+nb}{str}\PYG{p}{(}\PYG{n}{source}\PYG{o}{.}\PYG{n}{parent}\PYG{p}{),}
+        \PYG{n}{source}\PYG{o}{.}\PYG{n}{name}\PYG{p}{,}
+    \PYG{p}{],}
+    \PYG{n}{capture\PYGZus{}output}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,} \PYG{n}{text}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{,}
+\PYG{p}{)}
+\PYG{k}{if} \PYG{n}{result}\PYG{o}{.}\PYG{n}{returncode} \PYG{o}{!=} \PYG{l+m+mi}{0}\PYG{p}{:}
+    \PYG{n}{archive}\PYG{o}{.}\PYG{n}{unlink}\PYG{p}{(}\PYG{n}{missing\PYGZus{}ok}\PYG{o}{=}\PYG{k+kc}{True}\PYG{p}{)}
+    \PYG{k}{raise} \PYG{n+ne}{RuntimeError}\PYG{p}{(}\PYG{l+s+sa}{f}\PYG{l+s+s2}{\PYGZdq{}tar faalde: }\PYG{l+s+si}{\PYGZob{}}\PYG{n}{result}\PYG{o}{.}\PYG{n}{stderr}\PYG{o}{.}\PYG{n}{strip}\PYG{p}{()}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{)}
+\end{MintedVerbatim}

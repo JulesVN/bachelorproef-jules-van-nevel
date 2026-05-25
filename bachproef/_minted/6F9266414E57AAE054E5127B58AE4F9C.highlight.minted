@@ -1,0 +1,9 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{\PYGZsh{} Cache leegmaken voor reproduceerbare metingen}
+sudo\PYG{+w}{ }sh\PYG{+w}{ }\PYGZhy{}c\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}echo 3 \PYGZgt{} /proc/sys/vm/drop\PYGZus{}caches\PYGZsq{}}
+
+\PYG{c+c1}{\PYGZsh{} Meting van tijd, CPU en geheugen via /usr/bin/time}
+\PYG{n+nv}{time\PYGZus{}stats}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}/usr/bin/time\PYG{+w}{ }\PYGZhy{}f\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}\PYGZpc{}e,\PYGZpc{}P,\PYGZpc{}M\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }tar\PYG{+w}{ }\PYGZhy{}\PYGZhy{}zstd\PYG{+w}{ }\PYGZhy{}\PYGZhy{}listed\PYGZhy{}incremental\PYG{o}{=}backup.snar\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }\PYGZhy{}cf\PYG{+w}{ }archief.tar.zst\PYG{+w}{ }\PYGZhy{}C\PYG{+w}{ }/bron\PYG{+w}{ }item\PYG{+w}{ }\PYG{l+m}{2}\PYGZgt{}\PYG{p}{\PYGZam{}}\PYG{l+m}{1}\PYG{k}{)}
+\end{MintedVerbatim}

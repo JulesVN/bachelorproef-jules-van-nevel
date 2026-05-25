@@ -1,0 +1,10 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+c1}{\PYGZsh{} Basisarchief (level 0) of increment via \PYGZhy{}\PYGZhy{}listed\PYGZhy{}incremental:}
+tar\PYG{+w}{ }\PYGZhy{}\PYGZhy{}zstd\PYG{+w}{ }\PYGZhy{}\PYGZhy{}listed\PYGZhy{}incremental\PYG{o}{=}item.snar\PYG{+w}{ }\PYG{l+s+se}{\PYGZbs{}}
+\PYG{+w}{    }\PYGZhy{}cf\PYG{+w}{ }archief\PYGZus{}L0.tar.zst\PYG{+w}{ }\PYGZhy{}C\PYG{+w}{ }/KSP/saves\PYG{+w}{ }item/
+
+\PYG{c+c1}{\PYGZsh{} Read\PYGZhy{}only snapshot van het huidige subvolume (back\PYGZhy{}up):}
+sudo\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }snapshot\PYG{+w}{ }\PYGZhy{}r\PYG{+w}{ }./current\PYG{+w}{ }./snapshots/save\PYGZus{}1
+\PYG{c+c1}{\PYGZsh{} Herstel: snapshot swappen naar de werkmap:}
+sudo\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }snapshot\PYG{+w}{ }./snapshots/save\PYGZus{}1\PYG{+w}{ }./restore/save\PYGZus{}1
+\end{MintedVerbatim}

@@ -1,0 +1,24 @@
+\chapter{Testscripts}
+\label{app:testscripts}
+
+De vier Bash-scripts die zijn gebruikt voor de metingen in hoofdstuk~\ref{ch:technischeanalyse} worden hier weergegeven. Elk script accepteert twee argumenten: \texttt{backup} of \texttt{restore} als eerste argument, en het aantal herhaalde runs als tweede argument. Alle scripts schrijven hun resultaten weg naar een CSV-bestand in de \texttt{workspace/}-submap.
+
+\section{\texttt{full.sh}: Volledige back-up}
+\label{app:full-sh}
+
+\inputminted[breakanywhere,fontsize=\small,frame=single]{bash}{scripts/full.sh}
+
+\section{\texttt{incremental.sh}: incrementele back-up}
+\label{app:incremental-sh}
+
+\inputminted[breakanywhere,fontsize=\small,frame=single]{bash}{scripts/incremental.sh}
+
+\section{\texttt{differential.sh}: differentiële back-up}
+\label{app:differential-sh}
+
+\inputminted[breakanywhere,fontsize=\small,frame=single]{bash}{scripts/differential.sh}
+
+\section{\texttt{snapshot.sh}: snapshot back-up}
+\label{app:snapshot-sh}
+
+\inputminted[breakanywhere,fontsize=\small,frame=single]{bash}{scripts/snapshot.sh}

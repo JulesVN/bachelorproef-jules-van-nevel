@@ -1,0 +1,147 @@
+\begin{MintedVerbatim}[commandchars=\\\{\}]
+\PYG{c+ch}{\PYGZsh{}! /bin/bash}
+
+\PYG{n+nv}{DIR}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./saves\PYGZdq{}}
+\PYG{n+nv}{RUNS}\PYG{o}{=}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{2}\PYG{l+s+si}{\PYGZcb{}}
+\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./workspace/btrfs\PYGZus{}snapshots\PYGZdq{}}
+\PYG{n+nv}{RESTORE\PYGZus{}DIR\PYGZus{}BASE}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./workspace/btrfs\PYGZus{}restore\PYGZdq{}}
+\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}./workspace/current\PYGZus{}snapshot\PYGZdq{}}
+\PYG{n+nv}{RESULTS\PYGZus{}FILE}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/results.csv\PYGZdq{}}
+\PYG{n+nv}{RESTORE\PYGZus{}RESULTS\PYGZus{}FILE}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}DIR\PYGZus{}BASE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/results.csv\PYGZdq{}}
+
+mkdir\PYG{+w}{ }\PYGZhy{}p\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}DIR\PYGZus{}BASE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+mapfile\PYG{+w}{ }\PYGZhy{}t\PYG{+w}{ }SAVES\PYG{+w}{ }\PYGZlt{}\PYG{+w}{ }\PYGZlt{}\PYG{o}{(}find\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZhy{}mindepth\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYGZhy{}maxdepth\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYGZhy{}type\PYG{+w}{ }d\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }sort\PYG{o}{)}
+
+\PYG{n+nv}{INNER\PYGZus{}FOLDER}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}find\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{SAVES}\PYG{p}{[0]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZhy{}mindepth\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYGZhy{}maxdepth\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYGZhy{}type\PYG{+w}{ }d\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }head\PYG{+w}{ }\PYGZhy{}n1\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }xargs\PYG{+w}{ }basename\PYG{k}{)}
+\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}Detected inner folder: \PYGZsq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{INNER\PYGZus{}FOLDER}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZsq{}\PYGZdq{}}
+
+\PYG{n+nv}{TIME\PYGZus{}TMP}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}sudo\PYG{+w}{ }mktemp\PYG{k}{)}
+sudo\PYG{+w}{ }chmod\PYG{+w}{ }a+rw\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{TIME\PYGZus{}TMP}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{k}{function}\PYG{+w}{ }setup\PYGZus{}subvolume\PYG{+w}{ }\PYG{o}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k}{if}\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }show\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{\PYGZam{}}\PYGZgt{}/dev/null\PYG{p}{;}\PYG{+w}{ }\PYG{k}{then}
+\PYG{+w}{    }sudo\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }delete\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYG{p}{\PYGZam{}}\PYG{l+m}{2}
+\PYG{+w}{  }\PYG{k}{elif}\PYG{+w}{ }\PYG{o}{[[}\PYG{+w}{ }\PYGZhy{}d\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{o}{]]}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{then}
+\PYG{+w}{    }rm\PYG{+w}{ }\PYGZhy{}rf\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }\PYG{k}{fi}
+\PYG{+w}{  }mkdir\PYG{+w}{ }\PYGZhy{}p\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{\PYGZdl{}(}dirname\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }sudo\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }create\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYG{p}{\PYGZam{}}\PYG{l+m}{2}
+\PYG{+w}{  }sudo\PYG{+w}{ }chown\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{USER}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{:}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{USER}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{function}\PYG{+w}{ }cleanup\PYGZus{}snapshots\PYG{+w}{ }\PYG{o}{\PYGZob{}}
+\PYG{+w}{  }\PYG{k}{if}\PYG{+w}{ }\PYG{o}{[[}\PYG{+w}{ }\PYGZhy{}d\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{o}{]]}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{then}
+\PYG{+w}{    }\PYG{k}{while}\PYG{+w}{ }\PYG{n+nv}{IFS}\PYG{o}{=}\PYG{+w}{ }\PYG{n+nb}{read}\PYG{+w}{ }\PYGZhy{}r\PYG{+w}{ }snap\PYG{p}{;}\PYG{+w}{ }\PYG{k}{do}
+\PYG{+w}{      }sudo\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }delete\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{snap}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYG{p}{\PYGZam{}}\PYG{l+m}{2}
+\PYG{+w}{    }\PYG{k}{done}\PYG{+w}{ }\PYGZlt{}\PYG{+w}{ }\PYGZlt{}\PYG{o}{(}find\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZhy{}mindepth\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYGZhy{}maxdepth\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYGZhy{}type\PYG{+w}{ }d\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }sort\PYG{o}{)}
+\PYG{+w}{  }\PYG{k}{fi}
+\PYG{+w}{  }mkdir\PYG{+w}{ }\PYGZhy{}p\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{function}\PYG{+w}{ }run\PYGZus{}backup\PYG{+w}{ }\PYG{o}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{run}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{1}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{+w}{  }cleanup\PYGZus{}snapshots
+\PYG{+w}{  }setup\PYGZus{}subvolume
+
+\PYG{+w}{  }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{first\PYGZus{}save}\PYG{o}{=}\PYG{n+nb}{true}
+
+\PYG{+w}{  }\PYG{k}{for}\PYG{+w}{ }folder\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{SAVES}\PYG{p}{[@]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{do}
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{save\PYGZus{}name}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}basename\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{folder}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{snapshot}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{save\PYGZus{}name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{first\PYGZus{}save}\PYG{l+s+si}{\PYGZcb{}}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{then}
+\PYG{+w}{      }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{level}\PYG{o}{=}\PYG{l+m}{0}
+\PYG{+w}{      }\PYG{n+nv}{first\PYGZus{}save}\PYG{o}{=}\PYG{n+nb}{false}
+\PYG{+w}{    }\PYG{k}{else}
+\PYG{+w}{      }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{level}\PYG{o}{=}\PYG{l+m}{1}
+\PYG{+w}{    }\PYG{k}{fi}
+
+\PYG{+w}{    }rsync\PYG{+w}{ }\PYGZhy{}a\PYG{+w}{ }\PYGZhy{}\PYGZhy{}delete\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{folder}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{INNER\PYGZus{}FOLDER}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{INNER\PYGZus{}FOLDER}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/\PYGZdq{}}
+
+\PYG{+w}{    }sudo\PYG{+w}{ }sh\PYG{+w}{ }\PYGZhy{}c\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}echo 3 \PYGZgt{} /proc/sys/vm/drop\PYGZus{}caches\PYGZsq{}}
+
+\PYG{+w}{    }sudo\PYG{+w}{ }/usr/bin/time\PYG{+w}{ }\PYGZhy{}f\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}\PYGZpc{}e,\PYGZpc{}P,\PYGZpc{}M\PYGZdq{}}\PYG{+w}{ }\PYGZhy{}o\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{TIME\PYGZus{}TMP}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }snapshot\PYG{+w}{ }\PYGZhy{}r\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{CURRENT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{snapshot}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}/dev/null
+
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{time\PYGZus{}stats}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}cat\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{TIME\PYGZus{}TMP}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}
+
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{size\PYGZus{}original}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}du\PYG{+w}{ }\PYGZhy{}sb\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{folder}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{INNER\PYGZus{}FOLDER}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }awk\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}\PYGZob{}print \PYGZdl{}1\PYGZcb{}\PYGZsq{}}\PYG{k}{)}
+
+\PYG{+w}{    }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{run}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,btrfs\PYGZus{}snapshot,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{save\PYGZus{}name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{level}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{time\PYGZus{}stats}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{size\PYGZus{}original}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }\PYG{k}{done}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{function}\PYG{+w}{ }run\PYGZus{}restore\PYG{+w}{ }\PYG{o}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{run}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{1}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{+w}{  }mkdir\PYG{+w}{ }\PYGZhy{}p\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}DIR\PYGZus{}BASE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{+w}{  }\PYG{k}{for}\PYG{+w}{ }folder\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{SAVES}\PYG{p}{[@]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{do}
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{save\PYGZus{}name}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}basename\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{folder}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{snapshot}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{save\PYGZus{}name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{restore\PYGZus{}target}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}DIR\PYGZus{}BASE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{save\PYGZus{}name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{+w}{    }\PYG{k}{if}\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }show\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{restore\PYGZus{}target}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{\PYGZam{}}\PYGZgt{}/dev/null\PYG{p}{;}\PYG{+w}{ }\PYG{k}{then}
+\PYG{+w}{      }sudo\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }delete\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{restore\PYGZus{}target}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYG{p}{\PYGZam{}}\PYG{l+m}{2}
+\PYG{+w}{    }\PYG{k}{elif}\PYG{+w}{ }\PYG{o}{[[}\PYG{+w}{ }\PYGZhy{}d\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{restore\PYGZus{}target}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{o}{]]}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{then}
+\PYG{+w}{      }rm\PYG{+w}{ }\PYGZhy{}rf\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{restore\PYGZus{}target}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{    }\PYG{k}{fi}
+
+\PYG{+w}{    }sudo\PYG{+w}{ }sh\PYG{+w}{ }\PYGZhy{}c\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}echo 3 \PYGZgt{} /proc/sys/vm/drop\PYGZus{}caches\PYGZsq{}}
+
+\PYG{+w}{    }sudo\PYG{+w}{ }/usr/bin/time\PYG{+w}{ }\PYGZhy{}f\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}\PYGZpc{}e,\PYGZpc{}P,\PYGZpc{}M\PYGZdq{}}\PYG{+w}{ }\PYGZhy{}o\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{TIME\PYGZus{}TMP}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }btrfs\PYG{+w}{ }subvolume\PYG{+w}{ }snapshot\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{snapshot}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{restore\PYGZus{}target}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}/dev/null
+
+\PYG{+w}{    }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{time\PYGZus{}stats}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}cat\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{TIME\PYGZus{}TMP}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}
+
+\PYG{+w}{    }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{run}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,btrfs\PYGZus{}snapshot\PYGZus{}restore,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{save\PYGZus{}name}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,0,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{time\PYGZus{}stats}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }\PYG{k}{done}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{function}\PYG{+w}{ }run\PYGZus{}backup\PYGZus{}tests\PYG{+w}{ }\PYG{o}{\PYGZob{}}
+\PYG{+w}{  }rm\PYG{+w}{ }\PYGZhy{}f\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESULTS\PYGZus{}FILE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}run,label,save,level,time\PYGZus{}s,cpu\PYGZus{}pct,mem\PYGZus{}kb,size\PYGZus{}original,exclusive\PYGZus{}size,set\PYGZus{}shared\PYGZus{}size\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYGZgt{}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESULTS\PYGZus{}FILE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{+w}{  }\PYG{k}{for}\PYG{+w}{ }i\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{k}{\PYGZdl{}(}seq\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RUNS}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{do}
+\PYG{+w}{    }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}Started run }\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{i}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{    }run\PYGZus{}backup\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{i}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYGZgt{}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESULTS\PYGZus{}FILE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{    }\PYG{k}{for}\PYG{+w}{ }folder\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{SAVES}\PYG{p}{[@]}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{do}
+\PYG{+w}{      }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{snapshot}\PYG{o}{=}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{OUT\PYGZus{}DIR}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/}\PYG{k}{\PYGZdl{}(}basename\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{folder}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{      }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{exclusive\PYGZus{}size}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}sudo\PYG{+w}{ }btrfs\PYG{+w}{ }filesystem\PYG{+w}{ }du\PYG{+w}{ }\PYGZhy{}s\PYG{+w}{ }\PYGZhy{}\PYGZhy{}raw\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{snapshot}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }tail\PYG{+w}{ }\PYGZhy{}1\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }awk\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}\PYGZob{}print \PYGZdl{}2\PYGZcb{}\PYGZsq{}}\PYG{k}{)}
+\PYG{+w}{      }\PYG{n+nb}{local}\PYG{+w}{ }\PYG{n+nv}{set\PYGZus{}shared\PYGZus{}size}\PYG{o}{=}\PYG{k}{\PYGZdl{}(}sudo\PYG{+w}{ }btrfs\PYG{+w}{ }filesystem\PYG{+w}{ }du\PYG{+w}{ }\PYGZhy{}s\PYG{+w}{ }\PYGZhy{}\PYGZhy{}raw\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{snapshot}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }tail\PYG{+w}{ }\PYGZhy{}1\PYG{+w}{ }\PYG{p}{|}\PYG{+w}{ }awk\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}\PYGZob{}print \PYGZdl{}3\PYGZcb{}\PYGZsq{}}\PYG{k}{)}
+\PYG{+w}{      }sed\PYG{+w}{ }\PYGZhy{}i\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}/}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{i}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,btrfs\PYGZus{}snapshot,}\PYG{k}{\PYGZdl{}(}basename\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{folder}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}\PYG{l+s+s2}{,/s/}\PYGZdl{}\PYG{l+s+s2}{/,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{exclusive\PYGZus{}size}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{,}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{set\PYGZus{}shared\PYGZus{}size}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{/\PYGZdq{}}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESULTS\PYGZus{}FILE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{    }\PYG{k}{done}
+\PYG{+w}{  }\PYG{k}{done}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{function}\PYG{+w}{ }run\PYGZus{}restore\PYGZus{}tests\PYG{+w}{ }\PYG{o}{\PYGZob{}}
+\PYG{+w}{  }mkdir\PYG{+w}{ }\PYGZhy{}p\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}DIR\PYGZus{}BASE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }rm\PYG{+w}{ }\PYGZhy{}f\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}RESULTS\PYGZus{}FILE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}run,label,save,level,time\PYGZus{}s,cpu\PYGZus{}pct,mem\PYGZus{}kb\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYGZgt{}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}RESULTS\PYGZus{}FILE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+
+\PYG{+w}{  }\PYG{k}{for}\PYG{+w}{ }i\PYG{+w}{ }\PYG{k}{in}\PYG{+w}{ }\PYG{k}{\PYGZdl{}(}seq\PYG{+w}{ }\PYG{l+m}{1}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RUNS}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{k}{)}\PYG{p}{;}\PYG{+w}{ }\PYG{k}{do}
+\PYG{+w}{    }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}Started run }\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{i}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{    }run\PYGZus{}restore\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{i}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYGZgt{}\PYGZgt{}\PYG{l+s+s2}{\PYGZdq{}}\PYG{l+s+si}{\PYGZdl{}\PYGZob{}}\PYG{n+nv}{RESTORE\PYGZus{}RESULTS\PYGZus{}FILE}\PYG{l+s+si}{\PYGZcb{}}\PYG{l+s+s2}{\PYGZdq{}}
+\PYG{+w}{  }\PYG{k}{done}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{n+nb}{trap}\PYG{+w}{ }\PYG{l+s+s1}{\PYGZsq{}sudo rm \PYGZhy{}f \PYGZdq{}\PYGZdl{}\PYGZob{}TIME\PYGZus{}TMP\PYGZcb{}\PYGZdq{}\PYGZsq{}}\PYG{+w}{ }EXIT
+
+\PYG{k}{function}\PYG{+w}{ }usage\PYG{+w}{ }\PYG{o}{\PYGZob{}}
+\PYG{+w}{  }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}Usage: }\PYG{n+nv}{\PYGZdl{}0}\PYG{l+s+s2}{ \PYGZob{}backup | restore\PYGZcb{}\PYGZdq{}}
+\PYG{+w}{  }\PYG{n+nb}{exit}\PYG{+w}{ }\PYG{l+m}{1}
+\PYG{o}{\PYGZcb{}}
+
+\PYG{k}{case}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}}\PYG{n+nv}{\PYGZdl{}1}\PYG{l+s+s2}{\PYGZdq{}}\PYG{+w}{ }\PYG{k}{in}
+backup\PYG{o}{)}
+\PYG{+w}{  }run\PYGZus{}backup\PYGZus{}tests
+\PYG{+w}{  }\PYG{p}{;;}
+restore\PYG{o}{)}
+\PYG{+w}{  }run\PYGZus{}restore\PYGZus{}tests
+\PYG{+w}{  }\PYG{p}{;;}
+*\PYG{o}{)}
+\PYG{+w}{  }\PYG{n+nb}{echo}\PYG{+w}{ }\PYG{l+s+s2}{\PYGZdq{}Error: Unknown command \PYGZsq{}}\PYG{n+nv}{\PYGZdl{}1}\PYG{l+s+s2}{\PYGZsq{}\PYGZdq{}}
+\PYG{+w}{  }usage
+\PYG{+w}{  }\PYG{p}{;;}
+\PYG{k}{esac}
+\end{MintedVerbatim}
