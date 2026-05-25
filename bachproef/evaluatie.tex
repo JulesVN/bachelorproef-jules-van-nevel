@@ -8,14 +8,14 @@ Dit hoofdstuk evalueert het prototype dat is ontwikkeld op basis van de ontwerpr
 
 \subsection{Afbakening en motivering van de scope}
 
-De tool die in dit hoofdstuk wordt geëvalueerd, ondersteunt op dit moment één back-up-methode: incrementele tar+zstd. Btrfs-snapshotting werd in het finale prototype weggelaten. De doorslaggevende reden is: het aandeel computergebruikers dat een btrfs-bestandssysteem gebruikt is bijzonder laag, waardoor de relevantie van deze methode voor de doelgroep (KSP-spelers in het algemeen) beperkt blijft. Btrfs-ondersteuning wordt om die reden beschouwd als een uitbreiding voor toekomstig werk, detectie voor het type bestandssysteem is wel al geïmplementeerd. Sectie~\ref{sec:eval-conformiteit} gaat hier dieper op in bij de bespreking van de eerste ontwerprichtlijn.
+De tool die in dit hoofdstuk wordt geëvalueerd, ondersteunt op dit moment één back-up-methode: incrementele tar+zstd.
 
-Een tweede afbakening betreft de evaluatiemethodologie. De UX-evaluatie in sectie~\ref{sec:eval-heuristiek} steunt op een heuristische analyse volgens de tien usability-principes van Nielsen, uitgevoerd door de ontwikkelaar zelf op basis van praktisch gebruik van het prototype op een werkelijke KSP-installatie met meer dan 100 mods en verschillende savegames.
+Een verdere afbakening betreft de evaluatiemethodologie. De UX-evaluatie in sectie~\ref{sec:eval-heuristiek} steunt op een heuristische analyse volgens de tien usability-principes van Nielsen, uitgevoerd door de ontwikkelaar zelf op basis van praktisch gebruik van het prototype op een werkelijke KSP-installatie met meer dan 100 mods en verschillende savegames.
 
 \subsection{Keuze van de programmeertaal}
 \label{subsec:eval-taal}
 
-Voor de implementatie van het prototype werd Python gekozen. Deze keuze verdient toelichting, omdat CKAN (de bestaande modlauncher voor KSP) in C\# is geschreven. Vier overwegingen lagen aan de basis van de keuze voor Python in deze fase:
+Voor de implementatie van het prototype werd Python gekozen. Deze keuze verdient toelichting, omdat CKAN (de bestaande mod-launcher voor KSP) in C\# is geschreven. Vier overwegingen lagen aan de basis van de keuze voor Python in deze fase:
 
 \begin{itemize}
     \item \textbf{Aard van de werklast.} De kernoperaties van de tool (\texttt{btrfs subvolume snapshot}, \texttt{tar}, \texttt{zstd}, \texttt{rsync}, \texttt{findmnt}) zijn allemaal externe binaries die via shell-commando's worden aangeroepen. De programmeertaal speelt hier geen rol in de prestaties, alle rekenintensieve werk gebeurt in de aangeroepen tools. Pythons \texttt{subprocess}-module biedt de meest directe en leesbare integratie voor dit soort patronen op Linux.
@@ -24,7 +24,7 @@ Voor de implementatie van het prototype werd Python gekozen. Deze keuze verdient
     \item \textbf{CKAN-integratie als toekomstig werk.} Een rechtstreekse integratie van het back-upsysteem in CKAN is het ultieme einddoel van dit type tool, maar valt buiten de scope van dit prototype. Wanneer die integratie in de toekomst wordt ondernomen, is een C\#-implementatie de natuurlijke keuze. Voor de huidige fase, waarin de focus ligt op het valideren van de ontwerprichtlijnen via een werkende standalone tool, biedt Python de beste route.
 \end{itemize}
 
-De combinatie van Python met PySide6 (Qt for Python) levert een moderne dark-themed GUI op die past bij hedendaagse desktops. Figuur~\ref{fig:eval-home} toont het hoofdscherm van het prototype waarin een KSP-installatie met 113 mods is geconfigureerd.
+De combinatie van Python met PySide6 (Qt for Python) levert een moderne \textit{dark-themed} GUI op die past bij hedendaagse desktops. Figuur~\ref{fig:eval-home} toont het hoofdscherm van het prototype waarin een KSP-installatie met 113 mods is geconfigureerd.
 
 \begin{figure}[h]
     \centering
@@ -41,11 +41,10 @@ Om de functionele correctheid van het prototype systematisch te beoordelen, werd
 
 \subsection{Cluster 1: Basis back-up en restore}
 
-Tabel~\ref{tab:eval-cluster1} toont de testen van de kernfunctionaliteiten. Deze testen werden uitgevoerd op een werkelijke KSP-installatie met 113 mods die 20{,}5~GB omvatten. Eén van de testen (volledige back-up van de mod-set) leverde meteen ook een nuttige indicatieve meting op: de back-up van alle 113 mods (level~0) duurde ongeveer 37{,}5~seconden en resulteerde in een gecomprimeerd archief van 10{,}3~GB. Een volledige restore van die set duurde ongeveer 25~ seconden. Deze cijfers fungeren in dit hoofdstuk niet als benchmark, maar als bewijs dat het prototype daadwerkelijk werkt op realistische werklasten zonder de UI te bevriezen.
+Tabel~\ref{tab:eval-cluster1} toont de testen van de kernfunctionaliteiten. Deze testen werden uitgevoerd op een werkelijke KSP-installatie met 113 mods die 20{,}5~GB omvatten. Eén van de testen (volledige back-up van de mod-set) leverde meteen ook een nuttige indicatieve meting op: de back-up van alle 113 mods (level~0) duurde ongeveer 37{,}5~seconden en resulteerde in een gecomprimeerd archief van 10{,}3~GB. Een volledige restore van die set duurde ongeveer 25~ seconden. Deze cijfers fungeren in dit hoofdstuk niet als \textit{benchmark}, maar als bewijs dat het prototype daadwerkelijk werkt op realistische werklasten zonder de UI te bevriezen.
 
 \begin{table}[h]
     \centering
-    \caption{Cluster 1: basis back-up en restore.}
     \label{tab:eval-cluster1}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
@@ -61,6 +60,7 @@ Tabel~\ref{tab:eval-cluster1} toont de testen van de kernfunctionaliteiten. Deze
         Back-up en restore van een grote werklast (20{,}5~GB, 113 mods) & Operatie voltooit zonder UI-bevriezing; gemeten $\sim$37{,}5~s back-up, $\sim$25~s restore. & Geslaagd \\
         \bottomrule
     \end{tabular}
+    \caption{Cluster 1: basis back-up en restore.}
 \end{table}
 
 Figuur~\ref{fig:eval-backup-progress} toont het back-up-scherm tijdens een volledige back-up van de 113 mods. De vooruitgangsbalk en de live log onderaan houden de gebruiker geïnformeerd zonder dat de UI bevriest. De aangeroepen \texttt{tar}-processen draaien op een achtergrondthread via Qt's \texttt{QThread}-mechanisme.
@@ -68,7 +68,7 @@ Figuur~\ref{fig:eval-backup-progress} toont het back-up-scherm tijdens een volle
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.95\linewidth]{backup_scherm_tijdens_backup.png}
-    \caption{Back-up-scherm tijdens uitvoering. De progressbar toont dat de operaties nog bezig zijn en de log onderaan rapporteert per item de status en grootte. De gebruikersinterface blijft responsief tijdens de hele operatie.}
+    \caption{Back-up-scherm tijdens uitvoering. De \textit{progressbar} toont dat de operaties nog bezig zijn en de log onderaan rapporteert per item de status en grootte. De gebruikersinterface blijft responsief tijdens de hele operatie.}
     \label{fig:eval-backup-progress}
 \end{figure}
 
@@ -78,7 +78,6 @@ Tabel~\ref{tab:eval-cluster2} verzamelt de testen rond gebruikersinteractie en v
 
 \begin{table}[h]
     \centering
-    \caption{Cluster 2: selectie en interface.}
     \label{tab:eval-cluster2}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
@@ -92,6 +91,7 @@ Tabel~\ref{tab:eval-cluster2} verzamelt de testen rond gebruikersinteractie en v
         Groene cirkel toont het huidige back-uppunt & Na een back-up of restore krijgt het corresponderende back-uppunt een groene markering; oudere punten van hetzelfde item verliezen die markering. & Geslaagd \\
         \bottomrule
     \end{tabular}
+    \caption{Cluster 2: selectie en interface.}
 \end{table}
 
 Figuur~\ref{fig:eval-backup-screen} illustreert het selectiescherm na voltooiing van een back-up van alle 113 mods. De saves- en mods-kolommen tonen aanvinkbare lijsten, stock-mappen zoals \texttt{Squad} ontbreken. Figuur~\ref{fig:eval-restore-after} toont de restore-tab na een herstel van een save naar level 2: de groene cirkel naast het zonet herstelde punt geeft duidelijk aan welk punt op dit moment actief is in de werkmap.
@@ -117,7 +117,6 @@ Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata.
 
 \begin{table}[h]
     \centering
-    \caption{Cluster 3: configuratie en metadata.}
     \label{tab:eval-cluster3}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
@@ -130,13 +129,13 @@ Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata.
         Detectie van het bestandssysteem & \texttt{findmnt} geeft \texttt{btrfs} terug voor de getoonde installatie; de configuratie-tab rapporteert dit correct (zie figuur~\ref{fig:eval-home}). & Geslaagd \\
         \bottomrule
     \end{tabular}
+    \caption{Cluster 3: configuratie en metadata.}
 \end{table}
 
 \subsection{Cluster 4: Edge cases en foutafhandeling}
 
 \begin{table}[h]
     \centering
-    \caption{Cluster 4: edge cases en foutafhandeling.}
     \label{tab:eval-cluster4}
     \small
     \begin{tabular}{p{0.32\linewidth}p{0.42\linewidth}p{0.16\linewidth}}
@@ -149,6 +148,7 @@ Tabel~\ref{tab:eval-cluster3} verzamelt de testen rond configuratie en metadata.
         Cascade-waarschuwing bij verwijderen van een level 0 & De delete-dialoog vermeldt expliciet welke afhankelijke incrementen mee zullen worden verwijderd. & Geslaagd \\
         \bottomrule
     \end{tabular}
+    \caption{Cluster 4: edge cases en foutafhandeling.}
 \end{table}
 
 Tabel~\ref{tab:eval-cluster4} toont de testen van de edge cases en foutafhandeling. Bij het opzetten van deze testmatrix kwam tijdens de ontwikkeling een bug aan het licht: bij het verwijderen van een level-0-basisarchief werd het snar-bestand niet mee opgeruimd, waardoor de eerstvolgende back-up van datzelfde item als level 1 werd aangemaakt op basis van een verouderd snar-bestand. De fout werd verholpen door bij elke verwijdering te controleren of er nog een level-0-archief overblijft voor het betreffende item, en zo niet, het snar-bestand én alle verweesde incrementen mee op te ruimen. Figuur~\ref{fig:eval-delete-dialog} toont de bevestigingsdialoog die de gebruiker informeert over dit scenario.
@@ -167,7 +167,6 @@ In het vorige hoofdstuk werden elf ontwerprichtlijnen geformuleerd op basis van 
 
 \begin{table}[h]
     \centering
-    \caption{Conformiteit van het prototype met de ontwerprichtlijnen.}
     \label{tab:eval-conformiteit}
     \small
     \begin{tabular}{p{0.04\linewidth}p{0.40\linewidth}p{0.18\linewidth}p{0.25\linewidth}}
@@ -179,20 +178,21 @@ In het vorige hoofdstuk werden elf ontwerprichtlijnen geformuleerd op basis van 
         3 & Differentieel afgeraden                & Conform              & Geen optie aangeboden \\
         4 & Volledige back-up zelden zinvol        & Conform              & Level 0 dient enkel als basis \\
         5 & \texttt{zstd} standaard                & Volledig             & Kernimplementatie \\
-        6 & \texttt{xz} optioneel voor max. opslag & Niet geïmplementeerd & Uitbreiding \\
+        6 & \texttt{xz} optioneel voor max. opslag & Uitbreiding voorzien & Niet uitgewerkt \\
         7 & Andere algoritmes afgeraden            & Conform              & Geen optie aangeboden \\
         9 & Lokaal werken, geen netwerk            & Volledig             & Geen netwerklogica \\
         10 & Methode en compressie orthogonaal     & Conform              & Architectuur scheidt beide \\
         11 & Voorspelbaarheid als ontwerpkwaliteit & Volledig             & Methode zichtbaar in UI, sets gegroepeerd, huidige status zichtbaar \\
         \bottomrule
     \end{tabular}
+    \caption{Conformiteit van het prototype met de ontwerprichtlijnen.}
 \end{table}
 
 \paragraph{Richtlijn 1: Snapshotting als uitbreiding.}
 De technische analyse heeft btrfs-snapshotting aangeduid als de primaire methode voor opstellingen die het ondersteunen. In de finale tool werd deze methode echter weggelaten. Het percentage computergebruikers dat een btrfs-bestandssysteem gebruikt is bijzonder laag, en de typische KSP-speler bevindt zich op Windows met NTFS of op een Linux-systeem met ext4. Snapshotting heeft daardoor een beperkte praktische relevantie voor de doelgroep, ondanks de gunstige technische eigenschappen. Btrfs-snapshotting wordt om die reden behandeld als een uitbreiding in plaats van een kernvereiste. Het prototype valt voor alle bestandssystemen terug op de tweede aanbeveling uit de analyse: incrementele tar+zstd.
 
 \paragraph{Richtlijn 6: \texttt{xz} als uitbreiding.}
-De tool gebruikt momenteel uitsluitend \texttt{zstd} als compressie-algoritme, conform richtlijn~5. Een optionele variant met \texttt{xz} voor gebruikers die maximale opslagbesparing wensen werd nog niet geïmplementeerd. Het toevoegen van een tweede algoritme-keuze in de configuratie-tab is technisch eenvoudig en wordt beschouwd als een gepaste uitbreiding.
+De tool gebruikt momenteel uitsluitend \texttt{zstd} als compressie-algoritme, conform richtlijn~5. De mogelijkheid tot uitbreiding met \texttt{xz} voor gebruikers die maximale opslagbesparing wensen is voorzien in de PoC, maar niet uitgewerkt gezien het niet noodzakelijk is voor het onderzoek.
 
 
 \section{Heuristische evaluatie van de gebruikersinterface}
@@ -201,7 +201,7 @@ De tool gebruikt momenteel uitsluitend \texttt{zstd} als compressie-algoritme, c
 De bruikbaarheid van de UI werd beoordeeld via een heuristische evaluatie volgens de tien principes van Nielsen. Per principe wordt kort vermeld hoe het prototype ermee omgaat, met een lichte status (sterk, voldoende of aandachtspunt).
 
 \begin{description}
-    \item[Zichtbaarheid van systeemstatus: sterk.] De progressbar en live log tijdens een back-up of restore tonen duidelijk welke operatie aan de gang is. De groene cirkel naast het huidige back-uppunt informeert over de actieve toestand. De gekozen back-upmethode wordt rechtsbovenin de back-up-tab permanent zichtbaar gehouden.
+    \item[Zichtbaarheid van systeemstatus: sterk.] De \textit{progressbar} en live log tijdens een back-up of restore tonen duidelijk welke operatie aan de gang is. De groene cirkel naast het huidige back-uppunt informeert over de actieve toestand. De gekozen back-upmethode wordt rechtsbovenin de back-up-tab permanent zichtbaar gehouden.
     \item[Match met de echte wereld: sterk.] Begrippen als ``back-up maken'', ``herstellen'' en ``installatie toevoegen'' sluiten aan bij gangbaar taalgebruik van eindgebruikers. Technische termen zoals \texttt{btrfs} of \texttt{snar} blijven achter de schermen.
     \item[Gebruikerscontrole en vrijheid: voldoende.] Bevestigingsdialogen vóór restore en delete voorkomen accidentele onomkeerbare acties. Een ``ongedaan maken''-functie ontbreekt: eens een restore is uitgevoerd, kan de gebruiker enkel terugvallen op een ander back-uppunt.
     \item[Consistentie en standaarden: sterk.] De Qt/KDE- look-and-feel zorgt voor herkenbaar gedrag van knoppen, dialogen en lijsten. Acties die data wijzigen krijgen consistent een blauwe (primaire) of rode (gevaarlijke) accentkleur.
@@ -214,33 +214,6 @@ De bruikbaarheid van de UI werd beoordeeld via een heuristische evaluatie volgen
 \end{description}
 
 Een heuristische evaluatie door de ontwikkelaar zelf vangt blinde vlekken niet op die echte gebruikers wel zouden ontdekken. Deze sectie biedt daarom een gestructureerde reflectie op de UI-kwaliteit, geen gevalideerde usability-meting. Voor een productieversie zou gebruikersonderzoek met effectieve KSP-spelers een logische volgende stap zijn.
-
-
-\section{Beperkingen en aanknopingspunten voor toekomstig werk}
-\label{sec:eval-toekomst}
-
-Onderstaande punten geven aan welke aspecten buiten scope zijn gehouden en hoe zij in toekomstig werk kunnen worden aangepakt.
-
-\paragraph{Geen evaluatie met externe testers.}
-De UX-evaluatie steunt op een heuristische analyse door de ontwikkelaar zelf. Een gevalideerde usability-studie met effectieve KSP-spelers zou pas mogelijk zijn na een eerste distributie van de tool en valt buiten de scope van deze bachelorproef.
-
-\paragraph{Btrfs-snapshotting.}
-Zoals besproken in sectie~\ref{sec:eval-conformiteit} werd de snapshot-methode niet geïmplementeerd in de finale tool wegens de beperkte praktische relevantie voor de doelgroep. Voor gebruikers op een btrfs-systeem die het maximale uit hun bestandssysteem willen halen, blijft dit een goede uitbreiding.
-
-\paragraph{\texttt{xz} als optionele compressie.}
-De tool gebruikt momenteel uitsluitend \texttt{zstd}. Een configuratie-optie waarmee de gebruiker kan kiezen voor \texttt{xz} wanneer maximale opslagbesparing is gewild zou conform richtlijn~6 zijn en is technisch eenvoudig toe te voegen.
-
-\paragraph{automatische opruim.}
-Het prototype voorziet geen automatisch beheer van oude back-uppunten. Bij langdurig gebruik kan de hoeveelheid back-uppunten oplopen. Een mechanisme dat oudere punten verwijdert volgens een instelbare  optie, zou de opslagvoetafdruk op lange termijn beheersbaar houden.
-
-\paragraph{Scheduling van automatische back-ups.}
-Op dit moment maakt de gebruiker manueel een back-up via de back-up-tab. Een planning-mechanisme dat automatisch een back-up maakt vlak vóór een mod-update of op vaste tijdstippen, sluit aan bij het oorspronkelijke gebruiksscenario en is een logische uitbreiding.
-
-\paragraph{Multi-game-ondersteuning.}
-Het prototype ondersteunt enkel KSP. De architectuur is generiek genoeg om uitgebreid te worden naar andere mod-gebaseerde games.
-
-\paragraph{Integratie in een modlauncher.}
-Het ultieme doel van een back-upsysteem zoals dit is rechtstreekse integratie in een bestaande modlauncher. Voor KSP betekent dit een integratie in CKAN. Aangezien CKAN geschreven is in C\#, vraagt deze integratie een herschrijving van de tool in c\#. Dit valt buiten de scope van het prototype en wordt beschouwd als de volgende stap naar een volwaardig back-up systeem.
 
 
 \section{Samenvatting}

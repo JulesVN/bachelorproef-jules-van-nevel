@@ -4,11 +4,11 @@
 \section{Inleiding van de testopzet}
 \label{sec:inleiding-testopzet}
 
-In dit hoofdstuk wordt eerst een vergelijking gemaakt van verschillende back-up- en herstelmethodes, toegepast op data die typisch is voor modlaunchers. Het doel is om, op basis van metingen, te bepalen welke strategie het meest geschikt is voor het opslaan van twee fundamenteel verschillende soorten data: \emph{savegames} en \emph{modinstallaties}. In het tweede deel van dit hoofdstuk wordt onderzocht welk compressie-algoritme het meest geschikt is om gecombineerd te worden met de back-upmethodes uit het eerste deel.
+In dit hoofdstuk wordt eerst een vergelijking gemaakt van verschillende back-up- en herstelmethodes, toegepast op data die typisch is voor mod-launchers. Het doel is om, op basis van metingen, te bepalen welke strategie het meest geschikt is voor het opslaan van twee fundamenteel verschillende soorten data: savegames en mod-installaties. In het tweede deel van dit hoofdstuk wordt onderzocht welk compressie-algoritme het meest geschikt is om gecombineerd te worden met de back-upmethodes uit het eerste deel.
 
 \subsection{Geteste back-upmethodes}
 
-Er werden vier strategieën getest:
+Er worden vier strategieën getest:
 
 \begin{itemize}
     \item \textbf{Volledige back-up} (\textit{full}): bij elke back-up wordt de volledige doelmap in een nieuw archief geplaatst.
@@ -17,29 +17,30 @@ Er werden vier strategieën getest:
     \item \textbf{Snapshot} (\textit{btrfs snapshot}): het bestandssysteem zelf maakt een copy-on-write snapshot van het subvolume. Er wordt geen archiefbestand aangemaakt. De snapshot deelt initieel alle datablokken met het bronsubvolume en kost in eerste instantie enkel metadata-overhead.
 \end{itemize}
 
-Voor \emph{volledig}, \emph{incrementeel} en \emph{differentieel} werd \texttt{tar} ingezet als archiefformaat. Voor de snapshotmethode werd gebruikgemaakt van het \texttt{btrfs}-bestandssysteem.
+Voor \emph{volledig}, \emph{incrementeel} en \emph{differentieel} wordt \texttt{tar} ingezet als archiefformaat. Voor de snapshotmethode wordt gebruikgemaakt van het \texttt{btrfs}-bestandssysteem.
 
 \subsection{Datasets}
 \label{subsec:datasets}
 
-Voor de analyse werden twee datasets gebruikt die representatief zijn voor de werklast van een modlauncher:
+Voor de analyse worden twee datasets gebruikt die representatief zijn voor de werklast van een mod-launcher:
 
 \begin{itemize}
     \item \textbf{Savegames} (zes opeenvolgende savepoints, oplopend in grootte van $\sim$70~MB tot $\sim$144~MB): deze dataset simuleert een gebruiker die op verschillende tijdstippen tijdens het spelen van Kerbal Space Program (KSP) zijn savestate wenst op te slaan. \texttt{save\_1} stelt het oudste back-uppunt voor en \texttt{save\_6} het meest recente. De savegames zijn gerelateerd: opeenvolgende saves bevatten grotendeels dezelfde gegevens, met enkel de tussentijds gewijzigde savebestanden als verschil.
     \item \textbf{Grote mods} (drie opeenvolgende modversies van $\sim$1{,}3 tot $\sim$2{,}5~GB): deze dataset simuleert het updaten of terugdraaien van zware modpacks. \texttt{mod\_1} is de oudste versie, \texttt{mod\_3} de meest recente. KSP-mods uit de CKAN-index zijn voornamelijk klein, maar er bestaan modpacks die meerdere gigabytes innemen en niet via CKAN worden verspreid. Voor deze mods is een efficiënte back-up- en rollbackstrategie cruciaal, aangezien een mislukte update de gehele installatie kan beschadigen.
+    \item \textbf{Kleine mods met veel bestanden} (drie opeenvolgende versies van $\sim$45--47~MB): deze dataset simuleert de meest voorkomende KSP-mods uit de CKAN-index: relatief kleine pakketten bestaande uit veel kleine bestanden (configuratiebestanden, modeldefinities, texturen). In tegenstelling tot de savegames, die een beperkt aantal kleine bestanden bevatten, testen kleine mods de prestaties van de back-upmethodes bij een hoog bestandsaantal. De resultaten voor deze dataset worden afzonderlijk besproken in sectie~\ref{sec:kleine-mods}.
 \end{itemize}
 
 In beide datasets vertegenwoordigen de items dus opeenvolgende back-up\-punten in de tijd. Dit is essentieel voor de interpretatie van de incrementele en differentiële metingen: \texttt{save\_1} en \texttt{mod\_1} corresponderen telkens met de \emph{eerste} back-up, die per definitie de volledige basis vormt voor incrementele en differentiële strategieën. Latere back-uppunten bevatten enkel het verschil ten opzichte van respectievelijk de vorige back-up (incrementeel) of de basis-back-up (differentieel).
 
-Per combinatie van methode en compressie-algoritme werden tien opeenvolgende runs uitgevoerd om de invloed van toevallige variatie (bijvoorbeeld door I/O-caching of OS-scheduling) te beperken. Alle cijfers in dit hoofdstuk zijn gemiddelden over deze tien runs. Foutbalken in de figuren stellen de standaardafwijking voor.
+Per combinatie van methode en compressie-algoritme worden tien opeenvolgende runs uitgevoerd om de invloed van toevallige variatie (bijvoorbeeld door I/O-caching of OS-scheduling) te beperken. Alle cijfers in dit hoofdstuk zijn gemiddelden over deze tien runs. Foutbalken in de figuren stellen de standaardafwijking voor.
 
 \subsection{Compressie-algoritmes}
 
-Voor de tar-gebaseerde methodes werd telkens dezelfde set compressie-opties getest: \texttt{geen compressie}, \texttt{gzip}, \texttt{bzip2}, \texttt{xz}, \texttt{lzma}, \texttt{lzip}, \texttt{lzop} en \texttt{zstd}. Deze algoritmen worden in het tweede deel van dit hoofdstuk geanalyseerd, in het eerste deel wordt enkel de variant zonder compressie besproken om de zuivere back-upmethode-eigenschappen te isoleren.
+Voor de tar-gebaseerde methodes wordt telkens dezelfde set compressie-opties getest: \texttt{geen compressie}, \texttt{gzip}, \texttt{bzip2}, \texttt{xz}, \texttt{lzma}, \texttt{lzip}, \texttt{lzop} en \texttt{zstd}. Deze algoritmen worden in het tweede deel van dit hoofdstuk geanalyseerd, in het eerste deel wordt enkel de variant zonder compressie besproken om de zuivere back-upmethode-eigenschappen te isoleren.
 
 \subsection{Testomgeving}
 
-De metingen werden uitgevoerd op een laptop met de volgende specificaties:
+De metingen worden uitgevoerd op een laptop met de volgende specificaties:
 
 \begin{itemize}
     \item \textbf{Processor:} AMD Ryzen 9 5900HS (8 cores, 16 threads).
@@ -59,7 +60,7 @@ De metingen werden uitgevoerd op een laptop met de volgende specificaties:
 \subsection{Waarom geen cloud-gebaseerde back-up}
 \label{subsec:geen-cloud}
 
-In de literatuur over back-upsystemen wordt cloudopslag besproken als een robuuste en geografisch redundante oplossing. Voor de context van modlaunchers, en in het bijzonder voor KSP, is deze aanpak echter niet geschikt:
+In de literatuur over back-upsystemen wordt cloudopslag besproken als een robuuste en geografisch redundante oplossing. Voor de context van mod-launchers, en in het bijzonder voor KSP, is deze aanpak echter niet geschikt:
 
 \begin{itemize}
     \item KSP en de meeste mods werken volledig offline. Veel spelers gebruiken het spel in omgevingen zonder permanente internetverbinding (op verplaatsing, op een laptop in de trein, enz.). Een back-upsysteem dat een actieve verbinding vereist, kan in deze gevallen geen back-up maken op het moment dat dit nodig is, namelijk vlak voor een riskante in-game actie of andere willekeurige corruptie gebeurtenissen.
@@ -72,7 +73,7 @@ Door deze redenen wordt in de rest van dit onderzoek uitgegaan van lokale back-u
 \subsection{Betekenis van de meetvelden}
 \label{subsec:meetvelden}
 
-Voor elke run werden volgende metrieken vastgelegd:
+Voor elke run worden volgende metrieken vastgelegd:
 
 \begin{description}
     \item[\texttt{time\_s}] De wall clock time, in seconden, tussen het starten en beëindigen van de back-up- of restore-operatie. Voor de restorefase van incrementele en differentiële back-ups is dit de cumulatieve tijd: de tijd die nodig is om alle archieven uit te pakken die nodig zijn om het gewenste back-uppunt volledig terug te zetten. Voor incrementeel betekent dit de basis-back-up plus alle incrementen tot aan het gekozen punt. Voor differentieel betekent dit de basis-back-up plus de differentiële back-up van het gekozen punt.
@@ -182,7 +183,7 @@ Voor de snapshotmethode wordt de opslag op twee manieren weergegeven in figuren~
     \label{fig:snapshot-storage-mods}
 \end{figure}
 
-Bij de saves is de marginale kost per snapshot zeer uniform: elk van de eerste vijf snapshots draagt ongeveer 9~MB aan exclusieve data bij, met één duidelijke uitschieter (\texttt{save\_4}: 16~MB). Deze uitschieter komt opnieuw overeen met de hoger genoemde gameplay-piek tussen \texttt{save\_3} en \texttt{save\_4}: meer gewijzigde blokken impliceert meer data die exclusief in de voorafgaande snapshot achterblijft wanneer het bronvolume verandert. \texttt{save\_6} heeft een exclusieve grootte van 0~MB; dit punt representeert de actuele toestand van het bronvolume, waardoor al zijn blokken nog gedeeld zijn. De cumulatieve voetafdruk groeit lineair van $\sim$41~MB (één snapshot) tot $\sim$112~MB (zes snapshots), een fractie van de 196~MB die de incrementele strategie nodig heeft voor dezelfde back-ups.
+Bij de saves is de marginale kost per snapshot zeer uniform: elk van de eerste vijf snapshots draagt ongeveer 9~MB aan exclusieve data bij, met één duidelijke uitschieter (\texttt{save\_4}: 16~MB). Deze uitschieter komt opnieuw overeen met de hoger genoemde gameplay-piek tussen \texttt{save\_3} en \texttt{save\_4}: meer gewijzigde blokken impliceert meer data die exclusief in de voorafgaande snapshot achterblijft wanneer het bronvolume verandert. \texttt{save\_6} heeft een exclusieve grootte van 0~MB; dit punt representeert de actuele toestand van het bronvolume, waardoor al zijn blokken nog gedeeld zijn. De cumulatieve voetafdruk groeit lineair van $\sim$41~MB (één snapshot) tot $\sim$112~MB (zes snapshots), tegenover 196~MB voor de incrementele strategie over dezelfde zes back-uppunten.
 
 Bij de mods is het beeld vergelijkbaar: zowel \texttt{mod\_1} als \texttt{mod\_2} bevatten elk $\sim$67~MB exclusieve data, terwijl \texttt{mod\_3} (de actuele broninhoud) 0~MB exclusief heeft. De cumulatieve voetafdruk bedraagt $\sim$2{,}07~GB voor de drie mod-snapshots, tegenover $\sim$2{,}68~GB voor de incrementele tar-strategie en $\sim$6{,}80~GB voor de volledige tar-strategie.
 
@@ -192,7 +193,7 @@ Een belangrijke nuance is dat de ratio tussen exclusieve en gedeelde data afhang
 \section{Resultaten: restorefase}
 \label{sec:results-restore}
 
-Het herstellen van een back-up is voor de eindgebruiker minstens even belangrijk als de back-up zelf: een rollback wordt vrijwel altijd uitgevoerd in een situatie van tijdsdruk (een mod heeft de installatie gebroken, een savegame is corrupt). De restoretijd bepaalt hoe lang de gebruiker moet wachten om opnieuw te kunnen spelen. Zoals toegelicht in~\ref{subsec:meetvelden} is de gerapporteerde restoretijd voor incrementele en differentiële methodes cumulatief: de tijd die nodig is om alle archieven uit te pakken die nodig zijn om het gewenste back-uppunt te herstellen.
+Het herstellen van een back-up is voor de eindgebruiker een kritieke operatie: een rollback wordt uitgevoerd wanneer een mod de installatie heeft gebroken of een savegame corrupt is geraakt. De restoretijd bepaalt hoe lang de gebruiker moet wachten om opnieuw te kunnen spelen. Zoals toegelicht in~\ref{subsec:meetvelden} is de gerapporteerde restoretijd voor incrementele en differentiële methodes cumulatief: de tijd die nodig is om alle archieven uit te pakken die nodig zijn om het gewenste back-uppunt te herstellen.
 
 \subsection{Snelheid van de restore}
 \label{subsec:restore-time}
@@ -210,7 +211,7 @@ Figuur~\ref{fig:restore-time} toont de restoretijd per back-uppunt.
 Bij de saves stijgt de restoretijd geleidelijk van $\sim$0{,}13~s (\texttt{save\_1}) tot $\sim$0{,}20~s (\texttt{save\_6}), dit komt overeen met de groei van de archiefgrootte. Bij de mods zijn de restoretijden zeer gelijkaardig onder de verschillende methodes. Met \texttt{mod\_2} een verwaarloosbaar stuk langer dan incrementeel en differentieel rond $\sim$3{,}96~s.
 
 \paragraph{Incrementele restore.}
-De restoretijd stijgt zeer gelijmatig met elk back-uppunt, zowel bij saves ($\sim$0{,}10~s voor \texttt{save\_1} tot $\sim$0{,}28~s voor \texttt{save\_6}) als bij mods ($\sim$2{,}64~s voor \texttt{mod\_1} tot $\sim$4{,}04~s voor \texttt{mod\_3}). Dit lineaire verband is een direct gevolg van de cumulatieve aard van een incrementele restore: om \texttt{save\_6} terug te zetten moeten zes archieven sequentieel worden uitgepakt (basis + vijf incrementen), elk met zijn eigen overhead. Bij latere back-uppunten loopt deze opstartoverhead op en wordt de incrementele restore zelfs trager dan een volledige restore vanaf hetzelfde punt, bij de saves is dit duidelijk vanaf \texttt{save\_3}.
+De restoretijd stijgt zeer gelijkmatig met elk back-uppunt, zowel bij saves ($\sim$0{,}10~s voor \texttt{save\_1} tot $\sim$0{,}28~s voor \texttt{save\_6}) als bij mods ($\sim$2{,}64~s voor \texttt{mod\_1} tot $\sim$4{,}04~s voor \texttt{mod\_3}). Dit lineaire verband is een direct gevolg van de cumulatieve aard van een incrementele restore: om \texttt{save\_6} terug te zetten moeten zes archieven sequentieel worden uitgepakt (basis + vijf incrementen), elk met zijn eigen overhead. Bij latere back-uppunten loopt deze opstartoverhead op en wordt de incrementele restore zelfs trager dan een volledige restore vanaf hetzelfde punt, bij de saves is dit duidelijk vanaf \texttt{save\_3}.
 
 \paragraph{Differentiële restore.}
 Differentieel bevindt zich tussen volledig en incrementeel. Het restoreproces vereist altijd exact twee archieven: de basis-back-up en de differentiële back-up van het gewenste punt. Daardoor is de opstartoverhead constant, maar de hoeveelheid uit te pakken data groeit mee met de grootte van het differentieel-archief. Voor de saves gedraagt de differentiële restore zich vrijwel identiek aan de incrementele ($\sim$0{,}12~s tot $\sim$0{,}27~s). bij de mods ligt \texttt{mod\_2} bij $\sim$3{,}61~s en \texttt{mod\_3} bij $\sim$4{,}07~s, ook gelijk aan incrementeel.
@@ -234,6 +235,94 @@ Voor de tar-gebaseerde methodes ligt het CPU-gebruik tussen 75\% en 93\%, met de
 
 De snapshot-restore blijft, net als bij de back-up, op $\sim$25--28\% en illustreert opnieuw dat het hier in gewoon om een metadata-operatie gaat.
 
+\subsection{Genormaliseerd CPU-gebruik}
+\label{subsec:cpu-units}
+
+Het CPU-percentage drukt de \emph{intensiteit} van het CPU-gebruik uit, maar houdt geen rekening met de duur van de operatie. Om methodes eerlijk te vergelijken, wordt het CPU-gebruik genormaliseerd als het product van gemiddeld CPU-gebruik en wandkloktijd:
+
+\begin{equation*}
+    \text{CPU-eenheden} = \frac{cpu\_pct}{100} \times tijd\_s
+\end{equation*}
+
+Zo corresponderen 60\% gedurende 10~s met 6 CPU-eenheden, en 200\% gedurende 2~s met 4 CPU-eenheden, de tweede operatie is sneller én minder belastend voor de rest van het systeem.
+
+Figuren~\ref{fig:backup-cpu-units} en~\ref{fig:restore-cpu-units} tonen dit genormaliseerde CPU-gebruik voor respectievelijk de back-up- en restorefase.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig_backup_cpu_units_per_point.png}
+    \caption{Genormaliseerde CPU-last tijdens de back-upfase: CPU-eenheden $= (cpu\_pct / 100) \times tijd\_s$. Een hogere waarde duidt op een grotere totale CPU-werklast, ongeacht hoe lang de operatie duurt.}
+    \label{fig:backup-cpu-units}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig_restore_cpu_units_per_point.png}
+    \caption{Genormaliseerde CPU-last tijdens de restorefase.}
+    \label{fig:restore-cpu-units}
+\end{figure}
+
+De genormaliseerde weergave laat een ander beeld zien dan de procentuele CPU-grafiek. Bij de mods is de volledige methode de duurste in termen van totale CPU-werklast: elke back-up kost circa 7--8 CPU-eenheden. De incrementele methode toont een sterke verbetering bij opeenvolgende incrementen: \texttt{mod\_2} en \texttt{mod\_3} kosten slechts $\sim$0{,}5--0{,}7 eenheden, doordat die operaties in minder dan één seconde afhandelen. De snapshotmethode is in beide fasen de goedkoopste: de combinatie van een korte duur en een laag CPU-percentage resulteert in een verwaarloosbare totale CPU-last per back-up- of restore-actie.
+
+
+\section{Kleine mods met veel bestanden}
+\label{sec:kleine-mods}
+
+\subsection{Back-up- en restoretijd}
+
+Figuur~\ref{fig:small-mod-time} toont de back-up- en restoretijd per back-uppunt voor de kleine mods.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig_small_mod_time_per_point.png}
+    \caption{Back-uptijd (links) en restoretijd (rechts) per back-uppunt voor kleine mods met veel bestanden (gemiddelde over 10 runs, foutbalken: standaardafwijking).}
+    \label{fig:small-mod-time}
+\end{figure}
+
+\paragraph{Volledige back-up.}
+De volledige back-up duurt $\sim$0{,}19~s, wat hoger ligt dan verwacht voor een dataset van $\sim$46~MB. Ter vergelijking duurt een volledige back-up van de savegames, die $\sim$70--144~MB groot zijn, slechts $\sim$0{,}10--0{,}17~s. De verklaring ligt in de per-bestandsoverhead: de kleine mods bestaan uit duizenden kleine bestanden. Voor elk bestand moet het systeem een afzonderlijk inode uitlezen, de bestandsattributen opvragen en een \textit{tar}-header aanmaken. Deze metadata-operaties domineren de totale verwerkingstijd ten opzichte van de effectief over te schrijven databytes, waardoor een dataset van $\sim$46~MB met veel kleine bestanden trager te verwerken is dan een dataset van het dubbele volume die uit slechts enkele grote bestanden bestaat.
+
+\paragraph{Incrementele back-up.}
+De incrementele methode toont het meest opvallende patroon: het basisarchief (\texttt{mod\_1}) duurt $\sim$0{,}06~s, maar \texttt{mod\_2} reduceert tot slechts $\sim$0{,}03~s en \texttt{mod\_3} tot $\sim$0{,}02~s. Dit weerspiegelt het feit dat opeenvolgende versies van kleine mods typisch slechts een handvol bestanden wijzigen: het overeenkomstige incrementarchief bevat nauwelijks data ($\sim$2{,}9~MB voor \texttt{mod\_2} en $\sim$245~KB voor \texttt{mod\_3}).
+
+\paragraph{Snapshot.}
+De snapshotmethode vertoont, net als bij de andere datasets, een nagenoeg constante en minimale back-up- en restoretijd ($\sim$10~ms per restore). Bij de kleine mods is de exclusieve opslaggrootte van elke snapshot nul: alle datablokken blijven gedeeld tussen de snapshot en het bronvolume. Dit duidt erop dat de wijzigingen tussen de drie modversies zo klein zijn dat ze op btrfs-blokniveau geen exclusieve blokken opleveren.
+
+\subsection{Opslaggebruik}
+
+Tabel~\ref{tab:small-mod-storage} vat het opslaggebruik samen voor de kleine mods, geaggregeerd over de drie back-uppunten.
+
+\begin{table}[h]
+    \centering
+    \caption{Opslaggebruik voor kleine mods (drie back-uppunten, totaal). Opslag in MB.}
+    \label{tab:small-mod-storage}
+    \small
+    \begin{tabular}{lrr}
+        \toprule
+        \textbf{Methode} & \textbf{Opslag (MB)} & \textbf{Besparing t.o.v. volledig} \\
+        \midrule
+        Volledig      & $\sim$145 & -- \\
+        Incrementeel  & $\sim$49  & 66\% \\
+        Differentieel & $\sim$52  & 64\% \\
+        Snapshot      & $<$1      & $>$99\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+De incrementele strategie levert bij kleine mods een bijzonder gunstige verhouding op: drie back-uppunten kosten samen slechts $\sim$49~MB, tegenover $\sim$145~MB voor drie volledige back-ups. De snapshotmethode is in dit geval nog extremer efficiënt, met een bijna verwaarloosbare fysieke voetafdruk, doordat de versies slechts minimaal van elkaar verschillen op blokniveau.
+
+\subsection{Compressie}
+
+Voor compressie volgen kleine mods een patroon dat zich situeert tussen savegames en grote mods. Figuur~\ref{fig:small-mod-compression} toont de archiefgrootte en compressietijd per algoritme.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{figures/fig_small_mod_compression.png}
+    \caption{Links: archiefgrootte per compressie-algoritme voor de volledige back-up van de drie kleine mods (origineel: $\sim$141~MB). Rechts: compressietijd (log-schaal). \texttt{zstd} combineert een lage archiefgrootte met de kortste back-uptijd.}
+    \label{fig:small-mod-compression}
+\end{figure}
+
+De compressieratio's liggen tussen 0{,}24 (\texttt{xz}/\texttt{lzma}/\texttt{lzip}) en 0{,}50 (\texttt{lzop}), wat lager ligt dan bij grote mods (0{,}37--0{,}54) maar hoger dan bij savegames (0{,}05--0{,}19). Dit bevestigt dat kleine mods een mix van comprimeerbare en moeilijk comprimeerbare bestanden bevatten. \texttt{zstd} comprimeert in $\sim$0{,}59~s tot $\sim$45~MB en decomprimeert in $\sim$0{,}28~s, vergelijkbaar snel als de ongecomprimeerde back-up ($\sim$0{,}60~s). De aanbeveling van \texttt{zstd} als standaardkeuze geldt daarmee ook voor kleine mods.
 
 \section{Synthese en conclusie}
 \label{sec:synthese}
@@ -303,12 +392,25 @@ Voor grote mods is de keuze duidelijker:
 
 Voor mods is de winst van btrfs-snapshots zo groot dat dit als voorkeur\-strategie wordt aangenomen wanneer het bestandssysteem ondersteund is. De snelheid van een snapshot-rollback maakt het bovendien mogelijk om \emph{voor elke mod-update} automatisch een back-up\-punt aan te maken, zonder dat de gebruiker een merkbare vertraging ondervindt. Indien btrfs niet beschikbaar is, vormt een incrementele tar-back-up het beste compromis: de eerste back-up duurt $\sim$2{,}6~s (volledig basisarchief), maar daaropvolgende incrementen zijn aanzienlijk lichter.
 
+\subsection{Aanbeveling voor kleine mods}
+
+Kleine mods met veel bestanden vormen een ander gebruikspatroon dan grote mods, maar de meetresultaten leiden tot dezelfde strategische aanbeveling:
+
+\begin{itemize}
+    \item De incrementele methode is bijzonder efficiënt voor dit type data. Na de eerste volledige back-up zijn opeenvolgende incrementen verwaarloosbaar klein ($\sim$2{,}9~MB voor \texttt{mod\_2} en $\sim$245~KB voor \texttt{mod\_3}). De totale opslagkost voor drie back-uppunten bedraagt slechts $\sim$49~MB, tegenover $\sim$145~MB voor drie volledige back-ups.
+    \item De snapshotmethode is ook hier het meest opslagzuinig: de exclusieve opslagvoetafdruk per snapshot is vrijwel nul, omdat de versies op btrfs-blokniveau nauwelijks van elkaar afwijken.
+    \item De compressie-aanbeveling (\texttt{zstd}) blijft ongewijzigd: het algoritme comprimeert kleine mods tot $\sim$45~MB in $\sim$0{,}59~s en decomprimeert in $\sim$0{,}28~s.
+\end{itemize}
+
+Het is niet onderzocht en ook niet noodzakelijk om een vaste grens te definiëren tussen een ``kleine'' en een ``grote'' mod. De analyse toont immers aan dat dezelfde strategie (snapshotting indien beschikbaar, anders incrementeel met \texttt{zstd}-compressie) voor beide categorieën de beste resultaten oplevert. De enige relevante observatie is dat datasets met veel kleine bestanden een hogere per-bestandsoverhead vertonen bij de volledige back-up, maar dit beïnvloedt de keuze van de back-upmethode niet.
+
+
 \section{Analyse van de compressie-algoritmes}
 \label{sec:compressie}
 
 \subsection{Doel en opzet van deze analyse}
 
-In dit deel wordt onderzocht welk compressie-algoritme het meest geschikt is om gecombineerd te worden met de back-upmethodes uit de vorige sectie. Acht varianten werden getest: geen compressie als referentie, en zeven algoritmes die rechtstreeks via de \texttt{tar}-command beschikbaar zijn (\texttt{gzip}, \texttt{bzip2}, \texttt{xz}, \texttt{lzma}, \texttt{lzip}, \texttt{lzop} en \texttt{zstd}). De algoritmes zijn te groeperen in vijf families:
+In dit deel wordt onderzocht welk compressie-algoritme het meest geschikt is om gecombineerd te worden met de back-upmethodes uit de vorige sectie. Acht varianten worden getest: geen compressie als referentie, en zeven algoritmes die rechtstreeks via de \texttt{tar}-command beschikbaar zijn (\texttt{gzip}, \texttt{bzip2}, \texttt{xz}, \texttt{lzma}, \texttt{lzip}, \texttt{lzop} en \texttt{zstd}). De algoritmes zijn te groeperen in vijf families:
 
 \begin{itemize}
     \item \textbf{DEFLATE} -- \texttt{gzip}: het oudste en meest verspreide algoritme, gebaseerd op LZ77 + Huffman-codering.
@@ -318,9 +420,9 @@ In dit deel wordt onderzocht welk compressie-algoritme het meest geschikt is om 
     \item \textbf{Modern} -- \texttt{zstd} (Zstandard, ontwikkeld door Facebook): combineert een snelle LZ77-variant met een entropie- codering (FSE/Huffman) en biedt op het standaardniveau een goede verhouding tussen snelheid en compressieratio. Ondersteunt ook multithreading.
 \end{itemize}
 
-Ondanks de keuze die reeds in sectie~\ref{sec:results-backup} werd besproken, beperkt deze analyse zich tot toepassing op de volledige back-upmethode. Deze methode levert per back-up de meeste data om te comprimeren en biedt zo het zuiverste beeld van de inherente eigenschappen van elk algoritme. De bevindingen blijven grotendeels overdraagbaar naar de incrementele en differentiële methode, omdat de compressie-eigenschappen (ratio, doorvoer, geheugen) onafhankelijk zijn van de specifieke samenstelling van het te comprimeren tar-archief.
+Ondanks de keuze die reeds in sectie~\ref{sec:results-backup} wordt besproken, beperkt deze analyse zich tot toepassing op de volledige back-upmethode. Deze methode levert per back-up de meeste data om te comprimeren en biedt zo het zuiverste beeld van de inherente eigenschappen van elk algoritme. De bevindingen blijven grotendeels overdraagbaar naar de incrementele en differentiële methode, omdat de compressie-eigenschappen (ratio, doorvoer, geheugen) onafhankelijk zijn van de specifieke samenstelling van het te comprimeren tar-archief.
 
-In tegenstelling tot de vorige sectie worden de metrieken hier gerapporteerd als \emph{totaal over de hele dataset}: de zes saves of de drie mods samen. Dit aggregatieniveau volstaat om de algoritmes onderling te vergelijken; de individuele variatie tussen back-uppunten werd reeds in sectie~\ref{sec:results-backup} besproken en wordt door de keuze van compressie-algoritme niet merkelijk veranderd.
+In tegenstelling tot de vorige sectie worden de metrieken hier gerapporteerd als \emph{totaal over de hele dataset}: de zes saves of de drie mods samen. Dit aggregatieniveau volstaat om de algoritmes onderling te vergelijken; de individuele variatie tussen back-uppunten wordt reeds in sectie~\ref{sec:results-backup} besproken en wordt door de keuze van compressie-algoritme niet merkelijk veranderd.
 
 \subsection{Compressieratio en archiefgrootte}
 \label{subsec:compressie-ratio}
@@ -338,7 +440,7 @@ Figuur~\ref{fig:compression-size} toont de archiefgrootte per algoritme voor bei
 De zes savegames samen ($\sim$629~MB origineel) laten zich extreem goed comprimeren. \texttt{gzip} reduceert het archief tot $\sim$72~MB (ratio 0{,}115); de LZMA-familie haalt nog meer winst en duwt de archiefgrootte tot onder de 30~MB (ratio $\sim$0{,}046 -- 0{,}048). De spreiding tussen \texttt{xz}, \texttt{lzma} en \texttt{lzip} is verwaarloosbaar, ze gebruiken intern hetzelfde algoritme. Aan de andere kant van het spectrum staat \texttt{lzop}, dat slechts tot $\sim$121~MB inkort (ratio 0{,}192). \texttt{zstd} en \texttt{bzip2} landen beide rond $\sim$45~MB (ratio 0{,}072). Dat savegames zo sterk comprimeren wijst erop dat ze grotendeels uit gestructureerde tekstdata bestaan, met veel herhaling.
 
 \paragraph{Mods.}
-Bij de mods is het beeld dramatisch anders. Alle algoritmes convergeren rond een ratio van 0{,}37 -- 0{,}54, en het verschil tussen het beste algoritme (\texttt{lzma}, $\sim$2503~MB) en het slechtste (\texttt{lzop}, $\sim$3670~MB) is slechts een factor 1{,}5. \texttt{gzip}, \texttt{zstd} en \texttt{lzop} blijven steken rond $\sim$3200 -- 3670~MB. Voor de mod-werklast levert de keuze van het algoritme dus voornamelijk een afweging op tussen compressietijd en geheugengebruik, niet zozeer een verschil in eindgrootte.
+Bij de mods is het beeld dramatisch anders. Alle algoritmes convergeren rond een ratio van 0{,}37 -- 0{,}54, en het verschil tussen het beste algoritme (\texttt{lzma}, $\sim$2503~MB) en het slechtste (\texttt{lzop}, $\sim$3670~MB) is slechts een factor 1{,}5. \texttt{gzip}, \texttt{zstd} en \texttt{lzop} blijven rond $\sim$3200 -- 3670~MB. Voor de mod-werklast levert de keuze van het algoritme dus voornamelijk een afweging op tussen compressietijd en geheugengebruik, niet zozeer een verschil in eindgrootte.
 
 \subsection{Compressie- en decompressietijd}
 \label{subsec:compressie-tijd}
@@ -409,7 +511,7 @@ Een tweedimensionale afweging maakt de optimale keuzes veel gemakkelijker zichtb
     \centering
     \includegraphics[width=\linewidth]{figures/fig_compression_pareto_backup.png}
     \caption{Pareto-frontier voor de back-upfase: compressietijd (x-as,
-        log) tegenover archiefgrootte (y-as). Sterren markeren algoritmes op de Pareto-frontier, cirkels markeren gedomineerde algoritmes. Het kruis (geen compressie) wordt enkel getoond als referentie en werd uitgesloten uit de frontierberekening.}
+        log) tegenover archiefgrootte (y-as). Sterren markeren algoritmes op de Pareto-frontier, cirkels markeren gedomineerde algoritmes. Het kruis (geen compressie) wordt enkel getoond als referentie en wordt uitgesloten uit de frontierberekening.}
     \label{fig:pareto-backup}
 \end{figure}
 
@@ -421,7 +523,7 @@ Een tweedimensionale afweging maakt de optimale keuzes veel gemakkelijker zichtb
 \end{figure}
 
 \paragraph{Pareto-frontier voor de back-upfase.}
-Bij beide datasets bestaat de back-upfrontier uit drie tot vier algoritmes. Voor de saves: \texttt{zstd} (snel, redelijke ratio), \texttt{xz} (middelmatige tijd, goede ratio), en \texttt{lzma}/\texttt{lzip} (traag, beste ratio). Voor de mods: \texttt{zstd}, \texttt{gzip}, \texttt{xz} en \texttt{lzma}. \texttt{lzop} en \texttt{bzip2} liggen onder de frontier en zijn dus gedomineerd: \texttt{lzop} wordt gedomineerd door \texttt{zstd} (zstd is sneller én kleiner), en \texttt{bzip2} wordt gedomineerd door \texttt{xz}.
+Bij beide datasets bestaat de back-upfrontier uit drie tot vier algoritmes. Voor de saves: \texttt{zstd} (snel, redelijke ratio), \texttt{xz} (middelmatige tijd, goede ratio), en \texttt{lzma}/\texttt{lzip} (traag, beste ratio). Voor de mods: \texttt{zstd}, \texttt{gzip}, \texttt{xz} en \texttt{lzma}. \texttt{lzop} en \texttt{bzip2} liggen niet op de frontier en zijn dus gedomineerd: \texttt{lzop} wordt gedomineerd door \texttt{zstd} (zstd is sneller én kleiner), en \texttt{bzip2} wordt gedomineerd door \texttt{xz}.
 
 \paragraph{Pareto-frontier voor de restorefase.}
 De restoregrafieken geven een eenvoudiger beeld. Bij de saves: \texttt{zstd}, \texttt{xz} en \texttt{lzma} domineren alle overige algoritmes. \texttt{bzip2} en \texttt{lzip} vallen ver weg omdat hun decompressie traag is voor een ratio die geen voordeel oplevert ten opzichte van \texttt{xz}/\texttt{lzma}. Bij de mods is de frontier nog beknopter: \texttt{zstd}, \texttt{xz} en \texttt{lzma}, met \texttt{xz} duidelijk dominant boven \texttt{lzma} (kleinere ratio en snellere decompressie). \texttt{lzip} blijft op de frontier qua compressieratio bij sommige varianten, maar zijn $\sim$157~s decompressietijd op de mods plaatst hem ver buiten de praktische zone.
@@ -468,7 +570,7 @@ samen.
 \end{table}
 
 \paragraph{Aanbeveling voor savegames.}
-Bij de savegames komt \texttt{zstd} naar voren als de meest evenwichtige keuze: het comprimeert in $\sim$0{,}7~s tot $\sim$45~MB en decomprimeert in $\sim$0{,}7~s, met een geheugenvoetafdruk van $\sim$70~MB. Wie de allerkleinste archieven wil, kan kiezen voor \texttt{xz}, dat de archieven verder verkleint tot $\sim$30~MB met quasi-instantane decompressie ($\sim$0{,}85~s). De prijs is een back-uptijd die ongeveer 20 keer langer is en een geheugenpiek van $\sim$712~MB. Voor de typische gebruiker is dit een onnodig zwaar. \texttt{lzop} biedt geen meetbaar voordeel ten opzichte van \texttt{zstd} en wordt daarom afgeraden. \texttt{bzip2}, \texttt{lzma} en \texttt{lzip} verdedigen hun bestaansrecht hier niet: ze zijn allemaal aanzienlijk trager voor een zeer klein of onbestaand opslagvoordeel ten opzichte van \texttt{xz} of \texttt{zstd}.
+Bij de savegames komt \texttt{zstd} naar voren als de meest evenwichtige keuze: het comprimeert in $\sim$0{,}7~s tot $\sim$45~MB en decomprimeert in $\sim$0{,}7~s, met een geheugenvoetafdruk van $\sim$70~MB. Wie de allerkleinste archieven wil, kan kiezen voor \texttt{xz}, dat de archieven verder verkleint tot $\sim$30~MB met quasi-instantane decompressie ($\sim$0{,}85~s). De prijs is een back-uptijd die ongeveer 20 keer langer is en een geheugenpiek van $\sim$712~MB. Voor de typische gebruiker is dit onnodig zwaar. \texttt{lzop} biedt geen meetbaar voordeel ten opzichte van \texttt{zstd} en wordt daarom afgeraden. \texttt{bzip2}, \texttt{lzma} en \texttt{lzip} verdedigen hun bestaansrecht hier niet: ze zijn allemaal aanzienlijk trager voor een zeer klein of onbestaand opslagvoordeel ten opzichte van \texttt{xz} of \texttt{zstd}.
 
 \paragraph{Aanbeveling voor grote mods.}
 Bij de mods wordt de keuze sterk beperkt door het feit dat de ratio's onderling weinig verschillen (een factor 1{,}5 tussen het beste en het slechtste algoritme), terwijl de tijden meer dan twee orden van grootte verschillen. \texttt{zstd} springt er hier sterk uit: het comprimeert sneller dan tar zonder compressie ($\sim$8~s tegenover $\sim$9{,}5~s), produceert een archief van $\sim$3{,}21~GB (een opslagbesparing van 53\%) en decomprimeert in slechts $\sim$8{,}2~s. De totale back-up + restore-cyclus duurt met \texttt{zstd} ongeveer 16 seconden, tegenover meer dan 26 minuten voor \texttt{lzip}. Het geheugengebruik blijft beperkt tot $\sim$109~MB, ruim binnen de mogelijkheden van een gemiddeld systeem.
@@ -479,7 +581,7 @@ De LZMA-varianten leveren bij de mods slechts $\sim$22\% kleinere archieven dan 
 Een aantal vaststellingen gelden voor beide datasets:
 
 \begin{itemize}
-    \item \textbf{\texttt{zstd} is in vrijwel alle dimensies de beste keuze.} Het haalt een goede compressieratio, comprimeert sneller dan ongecomprimeerde tar (door multithreading en verminderde I/O), decomprimeert minstens even snel, en blijft binnen aanvaardbare geheugengrenzen. Voor een back-upsysteem in een modlauncher is dit veruit het beste algoritme.
+    \item \textbf{\texttt{zstd} is in vrijwel alle dimensies de beste keuze.} Het haalt een goede compressieratio, comprimeert sneller dan ongecomprimeerde tar (door multithreading en verminderde I/O), decomprimeert minstens even snel, en blijft binnen aanvaardbare geheugengrenzen. Voor een back-upsysteem in een mod-launcher is dit veruit het beste algoritme.
     \item \textbf{\texttt{bzip2} en \texttt{lzip} zijn obsoleet voor deze werklast.} Hun trage decompressie (vooral voor \texttt{lzip}) maakt ze ongeschikt voor een rollbackscenario, terwijl ze geen compressievoordeel bieden ten opzichte van \texttt{xz} of \texttt{lzma}.
     \item \textbf{\texttt{xz} is een verdedigbare keuze voor maximaal kleine archieven}, mits het geheugengebruik geen probleem vormt. Voor mods is dit een aandachtspunt: een piek van $\sim$2{,}3~GB tijdens een back-up kan op een gamingsysteem merkbare impact hebben.
     \item \textbf{Grote mods comprimeren slecht door reeds gecomprimeerde assets.} De keuze van een agressief algoritme levert hier niet de winst op die ze bij saves geeft. Het is dus geen slecht idee om per datatype te differentiëren: voor saves kan een agressiever algoritme zinvol zijn, voor mods is een snel algoritme zoals \texttt{zstd} duidelijk de beste optie.
@@ -489,7 +591,7 @@ Een aantal vaststellingen gelden voor beide datasets:
 \section{Algemene ontwerprichtlijnen}
 \label{sec:ontwerprichtlijnen}
 
-In deze afsluitende sectie worden de bevindingen uit de analyse van de back-upmethodes (sectie~\ref{sec:synthese}) en de analyse van de compressie-algoritmes (sectie~\ref{subsec:compressie-conclusie}) samengebracht tot één set van ontwerprichtlijnen voor een back-up\-systeem in een modlauncher. De richtlijnen worden gegroepeerd rond drie thema's: de keuze van de back-upmethode, de keuze van het compressie-algoritme, en algemene architecturele principes.
+In deze afsluitende sectie worden de bevindingen uit de analyse van de back-upmethodes (sectie~\ref{sec:synthese}) en de analyse van de compressie-algoritmes (sectie~\ref{subsec:compressie-conclusie}) samengebracht tot één set van ontwerprichtlijnen voor een back-up\-systeem in een mod-launcher. De richtlijnen worden gegroepeerd rond drie thema's: de keuze van de back-upmethode, de keuze van het compressie-algoritme, en algemene architecturele principes.
 
 \subsection{Richtlijnen voor de keuze van back-upmethode}
 
@@ -497,7 +599,7 @@ In deze afsluitende sectie worden de bevindingen uit de analyse van de back-upme
     \item \textbf{Snapshotting heeft de voorkeur wanneer het bestandssysteem dit toelaat.} Een copy-on-write snapshot-mechanisme (zoals btrfs of zfs) levert in alle geteste dimensies de beste resultaten: voorspelbare en lage back-up\-kost per back-uppunt, quasi-instantane rollbacks (in de orde van tientallen milliseconden), lage fysieke opslagvoetafdruk dankzij blok\-niveau-deduplicatie, en minimaal CPU- en geheugengebruik. Geen enkele andere geteste methode kan deze combinatie evenaren.
     \item \textbf{Wanneer snapshots niet beschikbaar zijn, is een incrementele methode het beste compromis.} De back-uptijd per punt is laag en het opslaggebruik is zuiniger dan dat van een volledige of differentiële strategie. De per-back-uppuntanalyse heeft echter aangetoond dat de cumulatieve restoretijd merkbaar oploopt naarmate er meer incrementen zijn. Een periodieke nieuwe basis-back-up is daarom wenselijk om de restoretijd binnen bruikbare grenzen te houden.
     \item \textbf{Een differentiële strategie wordt afgeraden.} De analyse heeft aangetoond dat differentieel geen meetbaar voordeel oplevert ten opzichte van incrementeel: de archieven groeien cumulatief met elke nieuwe back-up, het opslaggebruik ligt hoger, de back-uptijd is langer, en de restoretijd is nauwelijks beter dan bij incrementeel.
-    \item \textbf{Een volledige back-up zonder bijkomende logica is zelden zinvol.} Voor de werklast van een modlauncher levert deze methode geen voordeel op. De methode is enkel verdedigbaar voor scenario's waar de dataset uitzonderlijk klein en eenmalig is.
+    \item \textbf{Een volledige back-up zonder bijkomende logica is zelden zinvol.} Voor de werklast van een mod-launcher levert deze methode geen voordeel op. De methode is enkel verdedigbaar voor scenario's waar de dataset uitzonderlijk klein en eenmalig is.
 \end{enumerate}
 
 \subsection{Richtlijnen voor de keuze van compressie-algoritme}
@@ -512,14 +614,14 @@ In deze afsluitende sectie worden de bevindingen uit de analyse van de back-upme
 \subsection{Algemene architecturele principes}
 
 \begin{enumerate}\setcounter{enumi}{8}
-    \item \textbf{Het back-upsysteem moet lokaal functioneren.} Zoals besproken in sectie~\ref{subsec:geen-cloud} is een cloud-gebaseerde back-up niet geschikt voor de context van een modlauncher: het spel kan offline gespeeld worden en mods kunnen meerdere gigabytes groot zijn. De back-up moet dus kunnen plaatsvinden zonder afhankelijk te zijn van een netwerkverbinding. Een optionele synchronisatie naar een externe locatie kan worden toegevoegd, maar mag geen vereiste zijn voor de basisfunctionaliteit.
+    \item \textbf{Het back-upsysteem moet lokaal functioneren.} Zoals besproken in sectie~\ref{subsec:geen-cloud} is een cloud-gebaseerde back-up niet geschikt voor de context van een mod-launcher: het spel kan offline gespeeld worden en mods kunnen meerdere gigabytes groot zijn. De back-up moet dus kunnen plaatsvinden zonder afhankelijk te zijn van een netwerkverbinding. Een optionele synchronisatie naar een externe locatie kan worden toegevoegd, maar mag geen vereiste zijn voor de basisfunctionaliteit.
     \item \textbf{De combinatie van methode en compressie is grotendeels onafhankelijk.} Voor opstellingen met btrfs blijft de snapshotmethode primair en is compressie niet van toepassing (btrfs ondersteunt zelf transparante compressie, wat een afzonderlijke optimalisatie is buiten het bereik van dit onderzoek). Voor opstellingen waarin tar wordt gebruikt, levert de combinatie \texttt{tar + zstd} (incrementeel) de beste algemene afweging op: \texttt{zstd} voegt zo weinig extra rekentijd toe dat de gunstige eigenschappen van de incrementele methode behouden blijven, terwijl de archiefgrootte significant afneemt.
     \item \textbf{Voorspelbaarheid is een ontwerp\-eigenschap.} De analyses tonen aan dat snapshot-back-ups quasi-constante kosten hebben per back-up, terwijl tar-gebaseerde methodes meer variabiliteit vertonen, vooral de volledige restore op grote archieven. Voor een back-upsysteem dat geautomatiseerd wordt (bijvoorbeeld bij elke mod-update), is voorspelbaarheid een belangrijke kwaliteit: de gebruiker mag niet geconfronteerd worden met onverwachte wachttijden die de spelervaring verstoort.
 \end{enumerate}
 
 \subsection{Samenvatting van de aanbevolen configuratie}
 
-Op basis van het bovenstaande wordt de volgende standaardconfiguratie voor een modlauncher\-back\-up\-systeem aanbevolen:
+Op basis van het bovenstaande wordt de volgende standaardconfiguratie voor een mod-launcher\-back\-up\-systeem aanbevolen:
 
 \begin{itemize}
     \item \textbf{Primaire methode:} btrfs-snapshots, indien het bestandssysteem dit ondersteunt. Snapshots bij elke savegame en bij elke mod-installatie of -update.

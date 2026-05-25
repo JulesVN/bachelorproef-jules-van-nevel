@@ -8,18 +8,18 @@
 \section{\IfLanguageName{dutch}{Fase 1: Probleemanalyse en dataverzameling}{Fase 1: Problemanalysis and datacollection}}%
 \label{sec:fase1-probleemanalyse}
 
-De eerste fase van het onderzoek richt zich op het in kaart brengen van de aard en frequentie van fouten die optreden tijdens het gebruik van modlaunchers. Hiervoor worden online moddingcommunities en fora geanalyseerd, waaronder Reddit, GitHub en Steam. Deze platformen bevatten duizenden posts van spelers die problemen ondervinden bij het installeren of updaten van mods. Door deze posts te onderzoeken, kan een beeld gevormd worden van de meest voorkomende vormen van dataverlies en corruptie.
+De eerste fase van het onderzoek richt zich op het in kaart brengen van de aard en frequentie van fouten die optreden tijdens het gebruik van mod-launchers. Hiervoor worden online moddingcommunities en fora geanalyseerd, waaronder Reddit, GitHub en Steam. Deze platformen bevatten duizenden posts van spelers die problemen ondervinden bij het installeren of updaten van mods. Door deze posts te onderzoeken, kan een beeld gevormd worden van de meest voorkomende vormen van dataverlies en corruptie.
 
-De verzamelde informatie wordt vervolgens geclassificeerd volgens het type fout, zoals corrupte configuratiebestanden, conflicten tussen afhankelijkheden of beschadigde opslagdata. Op basis van deze data kan bepaald worden hoe vaak elk type probleem voorkomt en welke patronen zich daarbij tonen. Dit maakt het mogelijk om de impact van het ontbreken van herstelmechanismen te meten en om aan te tonen dat het hier niet om afzonderlijke incidenten gaat, maar om een terugkerend structureel probleem in de betrouwbaarheid van modlaunchers.
+De verzamelde informatie wordt vervolgens geclassificeerd volgens het type fout, zoals corrupte configuratiebestanden, conflicten tussen afhankelijkheden of beschadigde opslagdata. Op basis van deze data kan bepaald worden hoe vaak elk type probleem voorkomt en welke patronen zich daarbij tonen. Dit maakt het mogelijk om de impact van het ontbreken van herstelmechanismen te meten en om aan te tonen dat het hier niet om afzonderlijke incidenten gaat, maar om een terugkerend structureel probleem in de betrouwbaarheid van mod-launchers.
 
 \section{\IfLanguageName{dutch}{Fase 2: Technische analyse}{Fase 2: Technical analysis}}%
 \label{sec:fase2-technischeanalyse}
 
-Na de probleemanalyse volgt een technische analyse van bestaande back-up- en rollbacktechnieken. Het doel van deze fase is om op basis van metingen te bepalen welke methodes en compressie-algoritmes het meest geschikt zijn voor de werklast van een modlauncher.
+Na de probleemanalyse volgt een technische analyse van bestaande back-up- en rollbacktechnieken. Het doel van deze fase is om op basis van metingen te bepalen welke methodes en compressie-algoritmes het meest geschikt zijn voor de werklast van een mod-launcher.
 
 Vier back-up-methodes worden vergeleken: een volledige back-up, een incrementele back-up, een differentiële back-up en een copy-on-write snapshot via btrfs. Voor de eerste drie methodes wordt ook de invloed van zeven compressie-algoritmes gemeten: \texttt{gzip}, \texttt{bzip2}, \texttt{xz}, \texttt{lzma}, \texttt{lzip}, \texttt{lzop} en \texttt{zstd}.
 
-De evaluatie van elke combinatie gebeurt op vier criteria: snelheid, opslagruimte, CPU-gebruik en geheugengebruik. Zowel de back-upfase als de restorefase worden gemeten, omdat een rollback in een realistisch scenario typisch onder tijdsdruk plaatsvindt en de restoretijd daardoor minstens even relevant is als de back-uptijd. Het resultaat van deze fase is een set van ontwerprichtlijnen die bepalen welke combinatie van methode en compressie-algoritme het meest geschikt is voor de specifieke context van modlaunchers.
+De evaluatie van elke combinatie gebeurt op vier criteria: snelheid, opslagruimte, CPU-gebruik en geheugengebruik. Zowel de back-upfase als de restorefase worden gemeten. Het resultaat van deze fase is een set van ontwerprichtlijnen die bepalen welke combinatie van methode en compressie-algoritme het meest geschikt is voor de specifieke context van mod-launchers.
 
 \section{\IfLanguageName{dutch}{Fase 3: Evaluatie en validatie van het prototype}{Fase 4: Evaluation and validation}}%
 \label{sec:fase4-evaluatie}

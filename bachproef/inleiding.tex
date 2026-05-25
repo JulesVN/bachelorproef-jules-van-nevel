@@ -5,7 +5,7 @@
 \chapter{\IfLanguageName{dutch}{Inleiding}{Introduction}}%
 \label{ch:inleiding}
 
-Game modding vormt vandaag een belangrijk onderdeel van de hedendaagse gamecultuur. Het geeft spelers de mogelijkheid om bestaande spellen aan te passen of uit te breiden met nieuwe content, functionaliteiten en zelfs bug fixes. Dankzij modding blijven games vaak jarenlang relevant en ontstaan er gemeenschappen (communities) waarin spelers niet enkel consumenten zijn, maar ook ontwikkelaars en ontwerpers. Om dit proces te ondersteunen maken veel spelers gebruik van zogenaamde modlaunchers, dit zijn programma’s die de installatie, configuratie en het updaten van mods automatiseren. Een van de bekendere voorbeelden hiervan is het Comprehensive Kerbal Archive Network (CKAN), de modlauncher voor het ruimtevaartspel Kerbal Space Program.
+Game modding vormt vandaag een belangrijk onderdeel van de hedendaagse game-cultuur. Het geeft spelers de mogelijkheid om bestaande spellen aan te passen of uit te breiden met nieuwe content, functionaliteiten en zelfs \textit{bug fixes}. Dankzij modding blijven games vaak jarenlang relevant en ontstaan er gemeenschappen (\textit{communities}) waarin spelers niet enkel consumenten zijn, maar ook ontwikkelaars en ontwerpers. Om dit proces te ondersteunen maken veel spelers gebruik van zogenaamde mod-launchers, dit zijn programma’s die de installatie, configuratie en het updaten van mods automatiseren. Een van de bekendere voorbeelden hiervan is het Comprehensive Kerbal Archive Network (CKAN), de mod-launcher voor het ruimtevaartspel Kerbal Space Program.
 
 \section{\IfLanguageName{dutch}{Probleemstelling}{Problem Statement}}%
 \label{sec:probleemstelling}
@@ -14,11 +14,11 @@ CKAN laat gebruikers toe om met enkele muisklikken duizenden mods te installeren
 
 Voor veel spelers zonder diepgaande technische kennis is het herstellen van dergelijke situaties moeilijk of zelfs onmogelijk. De structuur van een game-installatie met tientallen of honderden gemodificeerde bestanden is complex, en fouten zijn zelden eenvoudig te herleiden tot één enkele mod. Vaak blijft er dan slechts één optie over: het volledig verwijderen en opnieuw installeren van het spel en alle gewenste mods, een proces dat vele uren kan kosten en waarbij persoonlijke voortgang verloren gaat. Dit zorgt niet alleen voor frustratie bij spelers, maar leidt ook tot bijkomende druk op modontwikkelaars, die regelmatig klachten ontvangen over problemen die niet door hun eigen mods worden veroorzaakt.
 
-Het fundamentele probleem is dat modlaunchers zoals CKAN geen robuust mechanisme bevatten om gebruikers te beschermen tegen dataverlies. In tegenstelling tot professionele softwarebeheersystemen, waarin back-ups en rollbackfuncties standaard zijn, moeten modders en spelers het stellen zonder automatische herstelopties. Wanneer een installatie misloopt, is er geen eenvoudige manier om terug te keren naar een vorige stabiele staat van de game. Dit tekort wordt extra problematisch door de grootte van moderne mods: pakketten zoals Real Solar System Reborn kunnen tot veertig gigabyte aan data omvatten, waardoor manuele back-ups onpraktisch en tijdrovend worden.
+Het fundamentele probleem is dat mod-launchers zoals CKAN geen robuust mechanisme bevatten om gebruikers te beschermen tegen dataverlies. In tegenstelling tot professionele softwarebeheersystemen, waarin back-ups en rollbackfuncties standaard zijn, moeten modders en spelers het stellen zonder automatische herstelopties. Wanneer een installatie misloopt, is er geen eenvoudige manier om terug te keren naar een vorige stabiele staat van de game. Dit tekort wordt extra problematisch door de grootte van moderne mods: pakketten zoals Real Solar System Reborn kunnen tot veertig gigabyte aan data omvatten, waardoor manuele back-ups onpraktisch en tijdrovend worden.
 
 Hoewel de community regelmatig tijdelijke oplossingen biedt, zoals het handmatig kopiëren van spelmappen of het gebruik van externe back-uptools, ontbreekt een geïntegreerd, betrouwbaar en gebruiksvriendelijk systeem. Bovendien is de bestaande kennis over dit probleem nog erg versnipperd en gebaseerd op losse ervaringen. Er bestaat weinig onderzoek naar hoe vaak dergelijke corrupties voorkomen, welke factoren eraan bijdragen en hoe een structurele oplossing eruit zou kunnen zien. Dit vormt een leegte binnen het domein van game software engineering, waar de aandacht voornamelijk gaat naar het ontwikkelen van nieuwe features, en zelden naar de duurzaamheid en betrouwbaarheid van moddingtools.
 
-De doelgroep van dit onderzoek bestaat voornamelijk uit ontwikkelaars van modlaunchers en gevorderde gebruikers binnen moddingcommunities. Zij hebben behoefte aan een beter inzicht in de risico’s van dataverlies en aan praktische richtlijnen om veilige installatieomgevingen te ontwerpen. De bachelorproef richt zich daarbij specifiek op het ontwerpen en evalueren van een robuust back-up- en rollbackmechanisme dat geïntegreerd kan worden binnen CKAN, maar waarvan de principes ook toepasbaar zijn op andere modlaunchers zoals Prism Launcher voor Minecraft en R2ModMan.
+De doelgroep van dit onderzoek bestaat voornamelijk uit ontwikkelaars van mod-launchers en gevorderde gebruikers binnen moddingcommunities. Zij hebben behoefte aan een beter inzicht in de risico’s van dataverlies en aan praktische richtlijnen om veilige installatieomgevingen te ontwerpen. De bachelorproef richt zich daarbij specifiek op het ontwerpen en evalueren van een robuust back-up- en rollbackmechanisme dat geïntegreerd kan worden binnen CKAN, maar waarvan de principes ook toepasbaar zijn op andere mod-launchers zoals Prism Launcher voor Minecraft en R2ModMan.
 
 
 \section{\IfLanguageName{dutch}{Onderzoeksvraag}{Research question}}%
@@ -26,14 +26,14 @@ De doelgroep van dit onderzoek bestaat voornamelijk uit ontwikkelaars van modlau
 
 De centrale onderzoeksvraag luidt dan:
 
-\textbf{Hoe kan een robuust en efficiënt back-up- en rollbackmechanisme worden ontworpen voor modlaunchers zoals CKAN, zodat dataverlies en corruptie voorkomen kunnen worden zonder negatieve impact op performantie of gebruiksvriendelijkheid?}
+\textbf{Hoe kan een robuust en efficiënt back-up- en rollbackmechanisme worden ontworpen voor mod-launchers zoals CKAN, zodat dataverlies en corruptie voorkomen kunnen worden zonder negatieve impact op performantie of gebruiksvriendelijkheid?}
 
 Om deze hoofdvraag te beantwoorden worden volgende deelvragen onderzocht:
 
 \begin{enumerate}
     \item Welke oplossingen worden vandaag toegepast om kapotte installaties of corrupte savegames te herstellen, en welke beperkingen vertonen zij?
     
-    \item Welke vormen van dataverlies en corruptie komen het vaakst voor bij modlaunchers zonder ingebouwd back-up- of rollbackmechanisme?
+    \item Welke vormen van dataverlies en corruptie komen het vaakst voor bij mod-launchers zonder ingebouwd back-up- of rollbackmechanisme?
     
     \item Welke technische methoden bestaan er om efficiënte back-up- en rollbacksystemen te implementeren in softwaretoepassingen?
     
@@ -45,7 +45,7 @@ Om deze hoofdvraag te beantwoorden worden volgende deelvragen onderzocht:
 \section{\IfLanguageName{dutch}{Onderzoeksdoelstelling}{Research objective}}%
 \label{sec:onderzoeksdoelstelling}
 
-De doelstelling van deze bachelorproef is om niet enkel een technisch werkend prototype af te leveren, maar ook om een reeks richtlijnen te formuleren die modlauncherontwikkelaars kunnen helpen om betrouwbare herstelmechanismen te integreren in hun software. Het uiteindelijke resultaat moet zorgen voor een stabielere en gebruiksvriendelijkere moddingervaring. Door deze kennis te bundelen in een concreet onderzoeksproject wil de bachelorproef een brug maken tussen academische inzichten uit software engineering en de praktijkgerichte noden van de moddinggemeenschap.
+De doelstelling van deze bachelorproef is om niet enkel een technisch werkend prototype af te leveren, maar ook om een reeks richtlijnen te formuleren die mod-launcherontwikkelaars kunnen helpen om betrouwbare herstelmechanismen te integreren in hun software. Het uiteindelijke resultaat moet zorgen voor een stabielere en gebruiksvriendelijkere moddingervaring. Door deze kennis te bundelen in een concreet onderzoeksproject wil de bachelorproef een brug maken tussen academische inzichten uit software engineering en de praktijkgerichte noden van de moddinggemeenschap.
 
 \section{\IfLanguageName{dutch}{Opzet van deze bachelorproef}{Structure of this bachelor thesis}}%
 \label{sec:opzet-bachelorproef}
@@ -58,7 +58,7 @@ In Hoofdstuk~\ref{ch:methodologie} wordt de methodologie toegelicht en worden de
 
 In Hoofdstuk~\ref{ch:probleemanalyse} wordt de aard en frequentie van problemen bij gebruikers in de moddingcommunity in kaart gebracht.
 
-In Hoofdstuk~\ref{ch:technischeanalyse} Worden verschillende back-up en rollback methodes onderzocht samen met verschillende compressie-algoritmes. Hier wordt een antwoord gegeven op welke methoden en compressie-algoritmes het best toepasbaar zijn in modlaunchers.
+In Hoofdstuk~\ref{ch:technischeanalyse} Worden verschillende back-up en rollback methodes onderzocht samen met verschillende compressie-algoritmes. Hier wordt een antwoord gegeven op welke methoden en compressie-algoritmes het best toepasbaar zijn in mod-launchers.
 
 In Hoofdstuk~\ref{ch:evaluatie-prototype} vindt de laatste fase van het onderzoek zich plaats. Hier zal de architectuur en effectiviteit van het prototype onderzocht en beoordeeld worden
 

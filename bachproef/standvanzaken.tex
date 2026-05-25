@@ -20,7 +20,7 @@ Een volledige back-up maakt een exacte kopie van alle geselecteerde data op een 
 \subsection{\IfLanguageName{dutch}{Incrementele back-up}{Incremental backup}}%
 \label{subsec:incrementelebackup}
 
-Een incrementele back-up kopieert alleen de bestanden die sinds de laatste back-up (volledig of incrementeel) zijn gewijzigd \autocite{Sauer2019}. Dit resulteert in aanzienlijk kleinere en snellere back-ups dan telkens volledig kopiëren. Het nadeel is dat het terugzetten ingewikkelder wordt: om de laatste staat te herstellen moet eerst de laatste volledige back-up en vervolgens álle tussenliggende incrementele back-ups worden toegepast. Als er een schijf ontbreekt of beschadigd is, kan herstel soms niet volledig zijn. In de praktijk worden daarom vaak één keer per week of maand een volledige back-up gemaakt, aangevuld met dagelijkse incrementele back-ups \autocite{Chervenak1998}.
+Een incrementele back-up kopieert alleen de bestanden die sinds de laatste back-up (volledig of incrementeel) zijn gewijzigd \autocite{Sauer2019}. Dit resulteert in aanzienlijk kleinere en snellere back-ups dan telkens volledig kopiëren. Het nadeel is dat het terugzetten ingewikkelder wordt: om de laatste staat te herstellen moet eerst de laatste volledige back-up en vervolgens álle tussenliggende incrementele back-ups worden toegepast. Als er een incrementele stap ontbreekt of beschadigd is, kan herstel soms niet volledig zijn. In de praktijk worden daarom vaak één keer per week of maand een volledige back-up gemaakt, aangevuld met dagelijkse incrementele back-ups \autocite{Chervenak1998}.
 
 \subsection{\IfLanguageName{dutch}{Differentiële back-up}{Differential backup}}%
 \label{subsec:differentielebackup}
@@ -37,10 +37,15 @@ Naast deze traditionele methoden bestaan er ook verschillen in de manier waarop 
 
 Om deze inconsistenties te voorkomen, maken veel moderne systemen gebruik van snapshots. Een snapshot is een bevroren, alleen-lezen kopie van het bestandssysteem op een bepaald tijdstip. Het concept van copy-on-write zorgt ervoor dat wijzigingen na het maken van de snapshot naar nieuwe opslagblokken worden geschreven, terwijl de originele toestand behouden blijft \autocite{Nakamura2020}. Snapshots hebben als voordeel dat ze snel kunnen worden gemaakt en hersteld, en dat gebruikers tijdens het proces gewoon kunnen doorwerken. Het nadeel is dat ze extra opslagruimte vragen naarmate meer veranderingen plaatsvinden.
 
-\subsection{\IfLanguageName{dutch}{Continue en online back-up}{Continuous and online backup}}%
-\label{subsec:continue-online}
+\subsection{\IfLanguageName{dutch}{Continue dataprotectie}{Continuous data protection}}%
+\label{subsec:cdp}
 
-Bij continue data protection (CDP) wordt elk wijzigingselement vrijwel direct geback-upt. In effect legt een dergelijk systeem een gedetailleerd logboek aan van alle datatransacties, waardoor herstel tot een willekeurig punt in het verleden mogelijk is. CDP maakt snelle herstelling mogelijk (herstel gebeurt binnen seconden) omdat er te allen tijde een vrijwel actuele kopie beschikbaar is \autocite{Barney2024}. Dit vereist echter wel een continue infrastructuur (vaak met constante netwerkverbinding) en kan complex zijn voor simpele applicaties. In een bredere context vallen onder online back-ups ook cloud-gebaseerde back-ups: data wordt (al dan niet frequent) naar externe opslag via internet verzonden. Dergelijke oplossingen bieden schaalbaarheid en off-site bescherming, maar zijn afhankelijk van internetverbinding en derden \autocite{Kirvan2023}. In de cloudomgeving worden daarom meestal incrementele of ‘incremental-forever’ schema’s gebruikt, omdat die minder bandbreedte en opslag vergen \autocite{Sullivan2025}. Het grote nadeel van cloud-back-ups is dat de initiële volledige back-up veel tijd kan kosten en dat bandbreedte een bottleneck wordt voor grote datasets \autocite{Kirvan2023}.
+Bij continue dataprotectie (CDP) wordt elk wijzigingselement vrijwel direct geback-upt. In essentie legt een dergelijk systeem een gedetailleerd logboek aan van alle datatransacties, waardoor herstel tot een willekeurig punt in het verleden mogelijk is. CDP maakt snelle herstelling mogelijk (herstel gebeurt binnen seconden) omdat er te allen tijde een vrijwel actuele kopie beschikbaar is \autocite{Barney2024}. Het nadeel van CDP is dat het continue schrijfoperaties vereist en daardoor meer I/O-belasting en complexiteit met zich meebrengt dan traditionele geplande back-ups.
+
+\subsection{\IfLanguageName{dutch}{Online en cloudgebaseerde back-up}{Online and cloud-based backup}}%
+\label{subsec:online-cloud}
+
+Online back-ups verzenden data naar externe opslag via internet, meestal naar een clouddienst. Dergelijke oplossingen bieden schaalbaarheid en off-site bescherming, maar zijn afhankelijk van een internetverbinding en van derden \autocite{Kirvan2023}. In de cloudomgeving worden daarom meestal incrementele of \textit{incremental-forever} schema’s gebruikt, omdat die minder bandbreedte en opslag nodig hebben \autocite{Sullivan2025}. Het grote nadeel van cloud-back-ups is dat de initiële volledige back-up veel tijd kan kosten en dat bandbreedte een bottleneck wordt voor grote datasets \autocite{Kirvan2023}.
 
 \section{\IfLanguageName{dutch}{Rollback- en hersteltechnieken}{Rollback and recover techniques}}%
 \label{sec:rollback-en-hersteltechnieken}
@@ -69,11 +74,11 @@ De besproken technieken tonen dat geen enkele methode universeel de beste keuze 
 
 Uit de literatuur blijkt dat in de praktijk vaak hybride oplossingen worden toegepast: bijvoorbeeld een periodieke volledige back-up gecombineerd met frequente incrementele updates of snapshots \autocite{McBride2020}. De uitdaging blijft om de juiste balans te vinden tussen betrouwbaarheid, prestaties en opslagverbruik, afhankelijk van de toepassing.
 
-Voor modlaunchers en andere consumententoepassingen is vooral gebruiksgemak cruciaal. Een effectief systeem moet snel herstel mogelijk maken zonder dat de gebruiker technische kennis nodig heeft.
+Voor mod-launchers en andere consumententoepassingen is vooral gebruiksgemak cruciaal. Een effectief systeem moet snel herstel mogelijk maken zonder dat de gebruiker technische kennis nodig heeft.
 
 \section{\IfLanguageName{dutch}{Bijkomende technieken: bestandscompressie}{Additional techniques: file compression}}%
 \label{sec:bestandscompressie}
 
 Compressie is een techniek die de grootte van opgeslagen data verkleint door redundantie te elimineren. Bij back-upsystemen is dit bijzonder relevant omdat minder opslagruimte vereist is en back-ups sneller over een netwerk kunnen worden overgedragen. Voor back-updoeleinden is uitsluitend verliesloze compressie geschikt, waarbij de originele data exact kan worden gereconstrueerd na decompressie. Bestaande verliesloze algoritmen vertonen echter fundamentele afwegingen: sommige behalen een hoge compressieverhouding, andere blinken uit in codeer- of decodersnelheid, maar geen enkel algoritme presteert consistent het beste op alle vlakken tegelijk \autocite{Rahman2025}.
 
-De keuze van het compressie-algoritme hangt sterk af van de specifieke toepassingsvereisten. Voor een back-upsysteem in een modlauncher waarbij snelheid en eenvoud centraal staan, biedt DEFLATE een bewezen en brede compatibiliteit. Wanneer opslagruimte schaarser is, levert LZMA de beste compressieverhouding. Wanneer een balans tussen beide vereist is en de decompressiesnelheid bij herstel cruciaal is, is Zstandard de meest geschikte keuze op basis van huidig onderzoek \autocite{Matt2025}.
+De keuze van het compressie-algoritme hangt sterk af van de specifieke toepassingsvereisten. Voor een back-upsysteem in een mod-launcher waarbij snelheid en eenvoud centraal staan, biedt DEFLATE een bewezen en brede compatibiliteit. Wanneer opslagruimte schaarser is, levert LZMA de beste compressieverhouding. Wanneer een balans tussen beide vereist is en de decompressiesnelheid bij herstel cruciaal is, is Zstandard de meest geschikte keuze op basis van huidig onderzoek \autocite{Matt2025}.
