@@ -135,9 +135,35 @@
 
 \listoflistings
 
-% Als je een lijst van afkortingen of termen wil toevoegen, dan hoort die
-% hier thuis. Gebruik bijvoorbeeld de ``glossaries'' package.
-% https://www.overleaf.com/learn/latex/Glossaries
+\chapter*{\IfLanguageName{dutch}{Lijst van afkortingen}{List of abbreviations}}
+\addcontentsline{toc}{chapter}{\IfLanguageName{dutch}{Lijst van afkortingen}{List of abbreviations}}
+\begin{description}[labelwidth=2cm, leftmargin=2.5cm, style=sameline]
+    \item[btrfs]  B-tree File System
+    \item[BWT]    Burrows-Wheeler Transformatie
+    \item[CKAN]   Comprehensive Kerbal Archive Network
+    \item[CDP]    Continue Dataprotectie
+    \item[CPU]    Central Processing Unit
+    \item[ext4]   Fourth Extended Filesystem
+    \item[FSE]    Finite State Entropy
+    \item[GB]     Gigabyte
+    \item[GPU]    Graphics Processing Unit
+    \item[I/O]    Input/Output
+    \item[KDE]    K Desktop Environment
+    \item[KSP]    Kerbal Space Program
+    \item[LZ77]   Lempel-Ziv 77
+    \item[LZMA]   Lempel-Ziv-Markov Chain Algorithm
+    \item[MB]     Megabyte
+    \item[NTFS]   New Technology File System
+    \item[NVMe]   Non-Volatile Memory Express
+    \item[PoC]    Proof of Concept
+    \item[RAM]    Random Access Memory
+    \item[RSS]    Resident Set Size
+    \item[SSD]    Solid State Drive
+    \item[UI]     User Interface
+    \item[UX]     User Experience
+    \item[zfs]    Zettabyte File System
+    \item[zstd]   Zstandard
+\end{description}
 
 %---------- Kern ---------------------------------------------------------------
 

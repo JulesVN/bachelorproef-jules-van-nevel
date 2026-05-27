@@ -37,4 +37,12 @@
 
 \chapter*{\IfLanguageName{dutch}{Samenvatting}{Abstract}}
 
-\lipsum[1-4]
+Wie mods installeert voor een game zoals Kerbal Space Program, maakt vaak gebruik van een mod-launcher zoals CKAN om installatie en beheer te automatiseren. Deze tools bieden echter geen ingebouwd back-up- of rollbackmechanisme. Wanneer een modinstallatie misloopt door conflicten, verouderde afhankelijkheden of een beschadigde savegame, heeft de gebruiker vaak slechts één optie: het spel volledig herinstalleren, een proces dat vele uren kan kosten en waarbij persoonlijke voortgang verloren kan gaan.
+
+De centrale onderzoeksvraag luidt: \textit{Hoe kan een robuust en efficiënt back-up- en rollbackmechanisme worden ontworpen voor mod-launchers zoals CKAN, zodat dataverlies en corruptie voorkomen kunnen worden zonder negatieve impact op performantie of gebruiksvriendelijkheid?} Het doel is een reeks onderbouwde ontwerprichtlijnen te formuleren en te valideren via een werkend prototype.
+
+Het onderzoek verloopt in drie fasen. Op basis van 47 posts uit de KSP-community, gespreid over twaalf jaar, brengt een eerste probleemanalyse de aard en frequentie van veelvoorkomende problemen in kaart. Vervolgens worden vier back-upmethodes en zeven compressie-algoritmes vergeleken via metingen op snelheid, opslaggebruik en systeembelasting. Ten slotte wordt een \textit{standalone} Python-prototype gebouwd en geëvalueerd met behulp van een functionele testmatrix, een conformiteitscheck en een heuristische UI-analyse.
+
+De probleemanalyse bevestigt dat crashende installaties door modconflicten en beschadigde savegames structurele, wijdverspreide problemen zijn waarvoor geen geïntegreerde oplossing bestaat. Uit de technische analyse komt btrfs-snapshotting naar voren als de meest aantrekkelijke methode op ondersteunde bestandssystemen, op andere systemen biedt incrementele tar in combinatie met \texttt{zstd}-compressie de beste afweging. Opvallend is dat \texttt{zstd} op grote werklasten sneller is dan ongecomprimeerde tar, terwijl de opslagwinst op de geteste modset circa 53 procent bedraagt. Het prototype toont dat deze aanpak praktisch realiseerbaar is: een back-up van een KSP-installatie van 20{,}5~GB met 113 mods voltooit in ongeveer 37{,}5 seconden, een restore in circa 25 seconden, terwijl de gebruikersinterface responsief blijft.
+
+Uit het onderzoek vloeien vier kernprincipes voort: een gelaagde methodekeuze op basis van het beschikbare bestandssysteem, compressie als integraal onderdeel van het ontwerp, lokale werking zonder netwerkafhankelijkheid, en voorspelbaarheid als centrale kwaliteit van de gebruikersinterface. De geformuleerde richtlijnen bieden een direct toepasbare basis voor ontwikkelaars van mod-launchers.

@@ -1,12 +1,6 @@
 \chapter{\IfLanguageName{dutch}{Stand van zaken}{State of the art}}%
 \label{ch:stand-van-zaken}
 
-% Tip: Begin elk hoofdstuk met een paragraaf inleiding die beschrijft hoe
-% dit hoofdstuk past binnen het geheel van de bachelorproef. Geef in het
-% bijzonder aan wat de link is met het vorige en volgende hoofdstuk.
-
-% Pas na deze inleidende paragraaf komt de eerste sectiehoofding.
-
 In dit hoofdstuk worden de voornaamste back-up- en rollback-technieken besproken die relevant zijn voor het beheer van game-mods. Eerst worden verschillende soorten back-upmethoden (volledige, incrementele, differentiële, enzovoort) bekeken, vervolgens mechanismen voor herstel en terugzetten van data. Bij de keuze van technieken spelen factoren mee zoals betrouwbaarheid, snelheid van herstel en gebruiksgemak. Dit vormt de theoretische basis voor het ontwerp van het prototype in de volgende hoofdstukken.
 
 \section{\IfLanguageName{dutch}{Back-uptechnieken}{Backup techniques}}%
@@ -35,17 +29,17 @@ Naast deze traditionele methoden bestaan er ook verschillen in de manier waarop 
 \subsection{Snapshots}%
 \label{subsec:snapshots}
 
-Om deze inconsistenties te voorkomen, maken veel moderne systemen gebruik van snapshots. Een snapshot is een bevroren, alleen-lezen kopie van het bestandssysteem op een bepaald tijdstip. Het concept van copy-on-write zorgt ervoor dat wijzigingen na het maken van de snapshot naar nieuwe opslagblokken worden geschreven, terwijl de originele toestand behouden blijft \autocite{Nakamura2020}. Snapshots hebben als voordeel dat ze snel kunnen worden gemaakt en hersteld, en dat gebruikers tijdens het proces gewoon kunnen doorwerken. Het nadeel is dat ze extra opslagruimte vragen naarmate meer veranderingen plaatsvinden.
+Om deze inconsistenties te voorkomen, maken veel moderne systemen gebruik van snapshots. Een snapshot is een bevroren, alleen-lezen kopie van het bestandssysteem op een bepaald tijdstip. Het concept van \textit{copy-on-write} zorgt ervoor dat wijzigingen na het maken van de snapshot naar nieuwe opslagblokken worden geschreven, terwijl de originele toestand behouden blijft \autocite{Nakamura2020}. Snapshots hebben als voordeel dat ze snel kunnen worden gemaakt en hersteld, en dat gebruikers tijdens het proces gewoon kunnen doorwerken. Het nadeel is dat ze extra opslagruimte vragen naarmate meer veranderingen plaatsvinden.
 
 \subsection{\IfLanguageName{dutch}{Continue dataprotectie}{Continuous data protection}}%
 \label{subsec:cdp}
 
-Bij continue dataprotectie (CDP) wordt elk wijzigingselement vrijwel direct geback-upt. In essentie legt een dergelijk systeem een gedetailleerd logboek aan van alle datatransacties, waardoor herstel tot een willekeurig punt in het verleden mogelijk is. CDP maakt snelle herstelling mogelijk (herstel gebeurt binnen seconden) omdat er te allen tijde een vrijwel actuele kopie beschikbaar is \autocite{Barney2024}. Het nadeel van CDP is dat het continue schrijfoperaties vereist en daardoor meer I/O-belasting en complexiteit met zich meebrengt dan traditionele geplande back-ups.
+Bij continue dataprotectie (CDP) wordt elk wijzigingselement vrijwel direct geback-upt. Dergelijk systeem legt een gedetailleerd logboek aan van alle datatransacties, waardoor herstel tot een willekeurig punt in het verleden mogelijk is. CDP maakt snelle herstelling mogelijk (herstel gebeurt binnen seconden) omdat er te allen tijde een vrijwel actuele kopie beschikbaar is \autocite{Barney2024}. Het nadeel van CDP is dat het continue schrijfoperaties vereist en daardoor meer I/O-belasting en complexiteit met zich meebrengt dan traditionele geplande back-ups.
 
 \subsection{\IfLanguageName{dutch}{Online en cloudgebaseerde back-up}{Online and cloud-based backup}}%
 \label{subsec:online-cloud}
 
-Online back-ups verzenden data naar externe opslag via internet, meestal naar een clouddienst. Dergelijke oplossingen bieden schaalbaarheid en off-site bescherming, maar zijn afhankelijk van een internetverbinding en van derden \autocite{Kirvan2023}. In de cloudomgeving worden daarom meestal incrementele of \textit{incremental-forever} schema’s gebruikt, omdat die minder bandbreedte en opslag nodig hebben \autocite{Sullivan2025}. Het grote nadeel van cloud-back-ups is dat de initiële volledige back-up veel tijd kan kosten en dat bandbreedte een bottleneck wordt voor grote datasets \autocite{Kirvan2023}.
+Online back-ups verzenden data naar externe opslag via internet, meestal naar een clouddienst. Dergelijke oplossingen bieden schaalbaarheid en off-site bescherming, maar zijn afhankelijk van een internetverbinding en van derden \autocite{Kirvan2023}. In de cloudomgeving worden daarom meestal incrementele of \textit{incremental-forever} schema’s gebruikt, omdat die minder bandbreedte en opslag nodig hebben \autocite{Sullivan2025}. Het grote nadeel van cloud-back-ups is dat de initiële volledige back-up veel tijd kan kosten en dat bandbreedte een \textit{bottleneck} wordt voor grote datasets \autocite{Kirvan2023}.
 
 \section{\IfLanguageName{dutch}{Rollback- en hersteltechnieken}{Rollback and recover techniques}}%
 \label{sec:rollback-en-hersteltechnieken}
@@ -55,12 +49,12 @@ Naast het maken van kopieën is het kunnen herstellen van een vorige, stabiele t
 \subsection{\IfLanguageName{dutch}{Journaling (bestandssystemen)}{Journaling (filesystems)}}%
 \label{subsec:journaling}
 
-Veel moderne bestandssystemen, zoals NTFS en ext4, gebruiken journaling om de consistentie van data te garanderen. Daarbij worden alle wijzigingen eerst weggeschreven naar een logboek voordat ze effectief worden uitgevoerd. Na een systeemcrash kan het systeem door het logboek te herhalen snel worden hersteld zonder een volledige schijfcontrole \autocite{Nakamura2020}. Journaling verkort de hersteltijd drastisch, maar introduceert extra schrijfactiviteiten die prestaties kunnen beïnvloeden, vooral bij systemen met veel kleine updates.
+Veel moderne bestandssystemen, zoals NTFS en ext4, gebruiken \textit{journaling} om de consistentie van data te garanderen. Daarbij worden alle wijzigingen eerst weggeschreven naar een logboek voordat ze effectief worden uitgevoerd. Na een systeemcrash kan het systeem door het logboek te herhalen snel worden hersteld zonder een volledige schijfcontrole \autocite{Nakamura2020}. \textit{Journaling} verkort de hersteltijd drastisch, maar introduceert extra schrijfactiviteiten die prestaties kunnen beïnvloeden, vooral bij systemen met veel kleine updates.
 
 \subsection{\IfLanguageName{dutch}{Transactionele log (databases)}{Transactional log (databases)}}%
 \label{subsec:transactionele-log}
 
-In databases wordt een vergelijkbaar principe toegepast in de vorm van transactionele logging. Het zogeheten write-ahead log registreert alle bewerkingen nog vóór ze worden toegepast, zodat het systeem bij een fout exact weet welke transacties onvolledig waren. Bij herstel worden de voltooide bewerkingen opnieuw uitgevoerd (redo), terwijl onvoltooide acties worden teruggedraaid (undo) \autocite{Takdir2025}. Deze methode maakt een nauwkeurig herstel mogelijk, bijvoorbeeld tot een specifiek punt in de tijd, maar vergt een zorgvuldig beheer van logbestanden die snel groot kunnen worden.
+In databases wordt een vergelijkbaar principe toegepast in de vorm van transactionele logging. Het zogeheten \textit{write-ahead log} registreert alle bewerkingen nog vóór ze worden toegepast, zodat het systeem bij een fout exact weet welke transacties onvolledig waren. Bij herstel worden de voltooide bewerkingen opnieuw uitgevoerd (\textit{redo}), terwijl onvoltooide acties worden teruggedraaid (\textit{undo}) \autocite{Takdir2025}. Deze methode maakt een nauwkeurig herstel mogelijk, bijvoorbeeld tot een specifiek punt in de tijd, maar vergt een zorgvuldig beheer van logbestanden die snel groot kunnen worden.
 
 \subsection{Snapshot rollback}%
 \label{subsec:snapshot-rollback}
@@ -70,13 +64,13 @@ Een eenvoudigere, maar in veel toepassingen effectieve aanpak is snapshot-rollba
 \section{\IfLanguageName{dutch}{Vergelijking en uitdagingen}{Comparisons and challenges}}%
 \label{sec:vergelijkingen-uitdagingen}
 
-De besproken technieken tonen dat geen enkele methode universeel de beste keuze is. Volledige back-ups bieden zekerheid, maar zijn traag en duur. Incrementele back-ups zijn efficiënter, maar maken het herstelproces complexer. Snapshot-gebaseerde methoden en journaling zorgen voor snelle hersteltijden, maar vragen extra opslagruimte of leiden tot prestatieverlies. Cloud- en continue back-ups verkorten de tijd tussen back-ups, maar zijn sterk afhankelijk van netwerkbandbreedte.
+De besproken technieken tonen dat geen enkele methode universeel de beste keuze is. Volledige back-ups bieden zekerheid, maar zijn traag en duur. Incrementele back-ups zijn efficiënter, maar maken het herstelproces complexer. Snapshot-gebaseerde methoden en \textit{journaling} zorgen voor snelle hersteltijden, maar vragen extra opslagruimte of leiden tot prestatieverlies. Cloud- en continue back-ups verkorten de tijd tussen back-ups, maar zijn sterk afhankelijk van netwerkbandbreedte en continue schrijfoperaties.
 
 Uit de literatuur blijkt dat in de praktijk vaak hybride oplossingen worden toegepast: bijvoorbeeld een periodieke volledige back-up gecombineerd met frequente incrementele updates of snapshots \autocite{McBride2020}. De uitdaging blijft om de juiste balans te vinden tussen betrouwbaarheid, prestaties en opslagverbruik, afhankelijk van de toepassing.
 
 Voor mod-launchers en andere consumententoepassingen is vooral gebruiksgemak cruciaal. Een effectief systeem moet snel herstel mogelijk maken zonder dat de gebruiker technische kennis nodig heeft.
 
-\section{\IfLanguageName{dutch}{Bijkomende technieken: bestandscompressie}{Additional techniques: file compression}}%
+\section{\IfLanguageName{dutch}{bestandscompressie}{file compression}}%
 \label{sec:bestandscompressie}
 
 Compressie is een techniek die de grootte van opgeslagen data verkleint door redundantie te elimineren. Bij back-upsystemen is dit bijzonder relevant omdat minder opslagruimte vereist is en back-ups sneller over een netwerk kunnen worden overgedragen. Voor back-updoeleinden is uitsluitend verliesloze compressie geschikt, waarbij de originele data exact kan worden gereconstrueerd na decompressie. Bestaande verliesloze algoritmen vertonen echter fundamentele afwegingen: sommige behalen een hoge compressieverhouding, andere blinken uit in codeer- of decodersnelheid, maar geen enkel algoritme presteert consistent het beste op alle vlakken tegelijk \autocite{Rahman2025}.
